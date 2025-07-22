@@ -27,7 +27,6 @@ class AccountAnalyticLine(models.Model):
             self.env['sale.order.line']._sellable_lines_domain(),
             self.env['sale.order.line']._domain_sale_line_service(),
             [
-                ('qty_delivered_method', 'in', ['analytic', 'timesheet']),
                 ('order_partner_id.commercial_partner_id', '=', unquote('commercial_partner_id')),
             ],
         ])
@@ -95,7 +94,7 @@ class AccountAnalyticLine(models.Model):
 
     def _is_not_billed(self):
         self.ensure_one()
-        return not self.timesheet_invoice_id or self.timesheet_invoice_id.state == 'cancel'
+        return not self.timesheet_invoice_id or (self.timesheet_invoice_id.state == 'cancel' and self.timesheet_invoice_id.payment_state != 'invoicing_legacy')
 
     def _check_timesheet_can_be_billed(self):
         return self.so_line in self.project_id.mapped('sale_line_employee_ids.sale_line_id') | self.task_id.sale_line_id | self.project_id.sale_line_id
@@ -103,7 +102,7 @@ class AccountAnalyticLine(models.Model):
     def _check_can_write(self, values):
         # prevent to update invoiced timesheets if one line is of type delivery
         if self.sudo().filtered(lambda aal: aal.so_line.product_id.invoice_policy == "delivery") and self.filtered(lambda t: t.timesheet_invoice_id and t.timesheet_invoice_id.state != 'cancel'):
-            if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'project_id', 'task_id', 'so_line', 'amount', 'date']):
+            if any(field_name in values for field_name in ['unit_amount', 'employee_id', 'project_id', 'task_id', 'so_line', 'date']):
                 raise UserError(_('You cannot modify timesheets that are already invoiced.'))
         return super()._check_can_write(values)
 
@@ -219,7 +218,10 @@ class AccountAnalyticLine(models.Model):
         company = self.env['res.company'].browse(vals.get('company_id'))
         accounts = self.env['account.analytic.account'].browse([
             int(account_id) for account_id in next(iter(distribution)).split(',')
-        ])
+        ]).exists()
+
+        if not accounts:
+            return super()._timesheet_preprocess_get_accounts(vals)
 
         plan_column_names = {account.root_plan_id._column_name() for account in accounts}
         mandatory_plans = [plan for plan in self._get_mandatory_plans(company, business_domain='timesheet') if plan['column_name'] != 'account_id']

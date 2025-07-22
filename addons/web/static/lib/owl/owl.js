@@ -279,13 +279,39 @@
         const rootNode = el.getRootNode();
         return rootNode instanceof ShadowRoot && el.ownerDocument.contains(rootNode.host);
     }
+    /**
+     * Determine whether the given element is contained in a specific root documnet:
+     * either directly or with a shadow root in between or in an iframe.
+     */
+    function isAttachedToDocument(element, documentElement) {
+        let current = element;
+        const shadowRoot = documentElement.defaultView.ShadowRoot;
+        while (current) {
+            if (current === documentElement) {
+                return true;
+            }
+            if (current.parentNode) {
+                current = current.parentNode;
+            }
+            else if (current instanceof shadowRoot && current.host) {
+                current = current.host;
+            }
+            else {
+                return false;
+            }
+        }
+        return false;
+    }
     function validateTarget(target) {
         // Get the document and HTMLElement corresponding to the target to allow mounting in iframes
         const document = target && target.ownerDocument;
         if (document) {
+            if (!document.defaultView) {
+                throw new OwlError("Cannot mount a component: the target document is not attached to a window (defaultView is missing)");
+            }
             const HTMLElement = document.defaultView.HTMLElement;
             if (target instanceof HTMLElement || target instanceof ShadowRoot) {
-                if (!document.body.contains(target instanceof HTMLElement ? target : target.host)) {
+                if (!isAttachedToDocument(target, document)) {
                     throw new OwlError("Cannot mount a component on a detached dom node");
                 }
                 return;
@@ -322,12 +348,40 @@
      */
     class Markup extends String {
     }
-    /*
-     * Marks a value as safe, that is, a value that can be injected as HTML directly.
-     * It should be used to wrap the value passed to a t-out directive to allow a raw rendering.
-     */
-    function markup(value) {
-        return new Markup(value);
+    function htmlEscape(str) {
+        if (str instanceof Markup) {
+            return str;
+        }
+        if (str === undefined) {
+            return markup("");
+        }
+        if (typeof str === "number") {
+            return markup(String(str));
+        }
+        [
+            ["&", "&amp;"],
+            ["<", "&lt;"],
+            [">", "&gt;"],
+            ["'", "&#x27;"],
+            ['"', "&quot;"],
+            ["`", "&#x60;"],
+        ].forEach((pairs) => {
+            str = String(str).replace(new RegExp(pairs[0], "g"), pairs[1]);
+        });
+        return markup(str);
+    }
+    function markup(valueOrStrings, ...placeholders) {
+        if (!Array.isArray(valueOrStrings)) {
+            return new Markup(valueOrStrings);
+        }
+        const strings = valueOrStrings;
+        let acc = "";
+        let i = 0;
+        for (; i < placeholders.length; ++i) {
+            acc += strings[i] + htmlEscape(placeholders[i]);
+        }
+        acc += strings[i];
+        return new Markup(acc);
     }
 
     function createEventHandler(rawEvent) {
@@ -3799,7 +3853,16 @@
             return key;
         }
     }
-    const TRANSLATABLE_ATTRS = ["label", "title", "placeholder", "alt"];
+    const TRANSLATABLE_ATTRS = [
+        "alt",
+        "aria-label",
+        "aria-placeholder",
+        "aria-roledescription",
+        "aria-valuetext",
+        "label",
+        "placeholder",
+        "title",
+    ];
     const translationRE = /^(\s*)([\s\S]+?)(\s*)$/;
     class CodeGenerator {
         constructor(ast, options) {
@@ -4804,16 +4867,15 @@
                 isMultiple = isMultiple || this.slotNames.has(ast.name);
                 this.slotNames.add(ast.name);
             }
-            const dynProps = ast.attrs ? ast.attrs["t-props"] : null;
-            if (ast.attrs) {
-                delete ast.attrs["t-props"];
-            }
+            const attrs = { ...ast.attrs };
+            const dynProps = attrs["t-props"];
+            delete attrs["t-props"];
             let key = this.target.loopLevel ? `key${this.target.loopLevel}` : "key";
             if (isMultiple) {
                 key = this.generateComponentKey(key);
             }
             const props = ast.attrs
-                ? this.formatPropObject(ast.attrs, ast.attrsTranslationCtx, ctx.translationCtx)
+                ? this.formatPropObject(attrs, ast.attrsTranslationCtx, ctx.translationCtx)
                 : [];
             const scope = this.getPropString(props, dynProps);
             if (ast.defaultContent) {
@@ -4918,11 +4980,11 @@
             parseTPortal(node, ctx) ||
             parseTCall(node, ctx) ||
             parseTCallBlock(node) ||
+            parseTTranslation(node, ctx) ||
+            parseTTranslationContext(node, ctx) ||
             parseTEscNode(node, ctx) ||
             parseTOutNode(node, ctx) ||
             parseTKey(node, ctx) ||
-            parseTTranslation(node, ctx) ||
-            parseTTranslationContext(node, ctx) ||
             parseTSlot(node, ctx) ||
             parseComponent(node, ctx) ||
             parseDOMNode(node, ctx) ||
@@ -5708,7 +5770,7 @@
     }
 
     // do not modify manually. This file is generated by the release script.
-    const version = "2.6.0";
+    const version = "2.8.0";
 
     // -----------------------------------------------------------------------------
     //  Scheduler
@@ -5803,13 +5865,6 @@
     Scheduler.requestAnimationFrame = window.requestAnimationFrame.bind(window);
 
     let hasBeenLogged = false;
-    const DEV_MSG = () => {
-        const hash = window.owl ? window.owl.__info__.hash : "master";
-        return `Owl is running in 'dev' mode.
-
-This is not suitable for production use.
-See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration for more information.`;
-    };
     const apps = new Set();
     window.__OWL_DEVTOOLS__ || (window.__OWL_DEVTOOLS__ = { apps, Fiber, RootFiber, toRaw, reactive });
     class App extends TemplateSet {
@@ -5826,7 +5881,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
             }
             this.warnIfNoStaticProps = config.warnIfNoStaticProps || false;
             if (this.dev && !config.test && !hasBeenLogged) {
-                console.info(DEV_MSG());
+                console.info(`Owl is running in 'dev' mode.`);
                 hasBeenLogged = true;
             }
             const env = config.env || {};
@@ -6190,6 +6245,7 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     exports.__info__ = __info__;
     exports.batched = batched;
     exports.blockDom = blockDom;
+    exports.htmlEscape = htmlEscape;
     exports.loadFile = loadFile;
     exports.markRaw = markRaw;
     exports.markup = markup;
@@ -6223,8 +6279,8 @@ See https://github.com/odoo/owl/blob/${hash}/doc/reference/app.md#configuration 
     Object.defineProperty(exports, '__esModule', { value: true });
 
 
-    __info__.date = '2025-01-15T10:40:24.184Z';
-    __info__.hash = 'a9be149';
+    __info__.date = '2025-06-30T12:46:06.424Z';
+    __info__.hash = 'b620502';
     __info__.url = 'https://github.com/odoo/owl';
 
 

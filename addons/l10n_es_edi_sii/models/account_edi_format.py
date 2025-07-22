@@ -1,62 +1,18 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
+import json
+import math
 from collections import defaultdict
-from urllib3.util.ssl_ import create_urllib3_context
-from urllib3.contrib.pyopenssl import inject_into_urllib3
-from OpenSSL.crypto import load_certificate, load_privatekey, FILETYPE_PEM
 
-from odoo import fields, models, _
-from odoo.exceptions import UserError
+import requests
+
+from odoo import _, fields, models
 from odoo.tools import html_escape, zeep
 from odoo.tools.float_utils import float_round
 
-import base64
-import math
-import json
-import requests
-
+from odoo.addons.certificate.tools import CertificateAdapter
 
 # Custom patches to perform the WSDL requests.
 # Avoid failure on servers where the DH key is too small
 EUSKADI_CIPHERS = "DEFAULT:!DH"
-
-
-class PatchedHTTPAdapter(requests.adapters.HTTPAdapter):
-    """ An adapter to block DH ciphers which may not work for the tax agencies called"""
-
-    def init_poolmanager(self, *args, **kwargs):
-        # OVERRIDE
-        inject_into_urllib3()
-        kwargs['ssl_context'] = create_urllib3_context(ciphers=EUSKADI_CIPHERS)
-        return super().init_poolmanager(*args, **kwargs)
-
-    def cert_verify(self, conn, url, verify, cert):
-        # OVERRIDE
-        # The last parameter is only used by the super method to check if the file exists.
-        # In our case, cert is an odoo record 'certificate.certificate' so not a path to a file.
-        # By putting 'None' as last parameter, we ensure the check about TLS configuration is
-        # still made without checking temporary files exist.
-        super().cert_verify(conn, url, verify, None)
-        conn.cert_file = cert
-        conn.key_file = None
-
-    def get_connection(self, url, proxies=None):
-        # OVERRIDE
-        # Patch the OpenSSLContext to decode the certificate in-memory.
-        conn = super().get_connection(url, proxies=proxies)
-        context = conn.conn_kw['ssl_context']
-
-        def patched_load_cert_chain(l10n_es_odoo_certificate, keyfile=None, password=None):
-            certificate = l10n_es_odoo_certificate
-            cert_obj = load_certificate(FILETYPE_PEM, base64.b64decode(certificate.sudo().pem_certificate))
-            pkey_obj = load_privatekey(FILETYPE_PEM, base64.b64decode(certificate.sudo().private_key_id.pem_key))
-
-            context._ctx.use_certificate(cert_obj)
-            context._ctx.use_privatekey(pkey_obj)
-
-        context.load_cert_chain = patched_load_cert_chain
-
-        return conn
 
 
 class AccountEdiFormat(models.Model):
@@ -102,7 +58,11 @@ class AccountEdiFormat(models.Model):
         # Detect for which is the main tax for 'recargo'. Since only a single combination tax + recargo is allowed
         # on the same invoice, this can be deduced globally.
 
-        recargo_tax_details = defaultdict(list)  # Mapping between main tax and recargo tax details
+        # Mapping between main tax and recargo tax details
+        # structure: {("l10n_es_type" of the main tax, amount of the main tax): {'tax_amount': float, 'applied_tax_amount': float}}
+        # dict of keys: tuple ("l10n_es_type" of the main tax, amount of the main tax)
+        #       values: dict of float
+        recargo_tax_details = defaultdict(lambda: defaultdict(float))
         for base_line in tax_details['base_lines']:
             line = base_line['record']
             taxes = line.tax_ids.flatten_taxes_hierarchy()
@@ -110,16 +70,17 @@ class AccountEdiFormat(models.Model):
             if recargo_tax and taxes:
                 recargo_main_tax = taxes.filtered(lambda x: x.l10n_es_type in ('sujeto', 'sujeto_isp'))[:1]
                 aggregated_values = tax_details['tax_details_per_record'][line]
-                if not recargo_tax_details.get(recargo_main_tax):
-                    recargo_tax_details[recargo_main_tax.l10n_es_type, recargo_main_tax.amount] = next(iter(
-                        values
-                        for values in aggregated_values['tax_details'].values()
-                        if (
-                            values['grouping_key']
-                            and values['grouping_key']['l10n_es_type'] == recargo_tax.l10n_es_type
-                            and values['grouping_key']['applied_tax_amount'] == recargo_tax.amount
-                        )
-                    ))
+                recargo_values = next(iter(
+                    values
+                    for values in aggregated_values['tax_details'].values()
+                    if (
+                        values['grouping_key']
+                        and values['grouping_key']['l10n_es_type'] == recargo_tax.l10n_es_type
+                        and values['grouping_key']['applied_tax_amount'] == recargo_tax.amount
+                    )
+                ))
+                recargo_tax_details[recargo_main_tax.l10n_es_type, recargo_main_tax.amount]['tax_amount'] += recargo_values['tax_amount']
+                recargo_tax_details[recargo_main_tax.l10n_es_type, recargo_main_tax.amount]['applied_tax_amount'] = recargo_values['applied_tax_amount']
 
         tax_amount_deductible = 0.0
         tax_amount_retention = 0.0
@@ -185,7 +146,12 @@ class AccountEdiFormat(models.Model):
                     tax_info = {
                         'BaseImponible': float_round(base_amount, 2),
                     }
-                    if tax_values['applied_tax_amount'] > 0.0:
+                    if tax_values['l10n_es_type'] == 'sujeto_agricultura':
+                        tax_info.update({
+                            'PorcentCompensacionREAGYP': tax_values['applied_tax_amount'],
+                            'ImporteCompensacionREAGYP': round(math.copysign(tax_values['tax_amount'], base_amount), 2),
+                        })
+                    elif tax_values['applied_tax_amount'] > 0.0:
                         tax_info.update({
                             'TipoImpositivo': tax_values['applied_tax_amount'],
                             'CuotaSoportada': float_round(math.copysign(tax_values['tax_amount'], base_amount), 2),
@@ -290,6 +256,7 @@ class AccountEdiFormat(models.Model):
             if invoice.delivery_date and invoice.delivery_date != invoice.invoice_date:
                 invoice_node['FechaOperacion'] = invoice.delivery_date.strftime('%d-%m-%Y')
             invoice_node['DescripcionOperacion'] = invoice.invoice_origin[:500] if invoice.invoice_origin else 'manual'
+            reagyp = invoice.invoice_line_ids.tax_ids.filtered(lambda t: t.l10n_es_type == 'sujeto_agricultura')
             if invoice.is_sale_document():
                 nif = invoice.company_id.vat[2:] if invoice.company_id.vat.startswith('ES') else invoice.company_id.vat
                 info['IDFactura']['IDEmisorFactura'] = {'NIF': nif}
@@ -324,7 +291,12 @@ class AccountEdiFormat(models.Model):
                 mod_303_11 = self.env.ref('l10n_es.mod_303_casilla_11_balance')._get_matching_tags()
                 tax_tags = invoice.invoice_line_ids.tax_ids.repartition_line_ids.tag_ids
                 intracom = bool(tax_tags & (mod_303_10 + mod_303_11))
-                invoice_node['ClaveRegimenEspecialOTrascendencia'] = '09' if intracom else '01'
+                if intracom:
+                    invoice_node['ClaveRegimenEspecialOTrascendencia'] = '09'
+                elif reagyp:
+                    invoice_node['ClaveRegimenEspecialOTrascendencia'] = '02'
+                else:
+                    invoice_node['ClaveRegimenEspecialOTrascendencia'] = '01'
 
             if invoice.move_type == 'out_invoice':
                 invoice_node['TipoFactura'] = 'F2' if is_simplified else 'F1'
@@ -332,9 +304,12 @@ class AccountEdiFormat(models.Model):
                 invoice_node['TipoFactura'] = 'R5' if is_simplified else 'R1'
                 invoice_node['TipoRectificativa'] = 'I'
             elif invoice.move_type == 'in_invoice':
-                invoice_node['TipoFactura'] = 'F1'
-                if invoice._l10n_es_is_dua():
+                if reagyp:
+                    invoice_node['TipoFactura'] = 'F6'
+                elif invoice._l10n_es_is_dua():
                     invoice_node['TipoFactura'] = 'F5'
+                else:
+                    invoice_node['TipoFactura'] = 'F1'
             elif invoice.move_type == 'in_refund':
                 invoice_node['TipoFactura'] = 'R4'
                 invoice_node['TipoRectificativa'] = 'I'
@@ -345,8 +320,7 @@ class AccountEdiFormat(models.Model):
 
             if invoice.is_sale_document():
                 # Customer invoices
-
-                if not com_partner._l10n_es_is_foreign():
+                if not com_partner._l10n_es_is_foreign() or is_simplified:
                     tax_details_info_vals = self._l10n_es_edi_get_invoices_tax_details_info(invoice)
                     invoice_node['TipoDesglose'] = {'DesgloseFactura': tax_details_info_vals['tax_details_info']}
 
@@ -373,11 +347,6 @@ class AccountEdiFormat(models.Model):
                         invoice_node.setdefault('TipoDesglose', {})
                         invoice_node['TipoDesglose'].setdefault('DesgloseTipoOperacion', {})
                         invoice_node['TipoDesglose']['DesgloseTipoOperacion']['Entrega'] = tax_details_info_consu_vals['tax_details_info']
-                    if not invoice_node.get('TipoDesglose'):
-                        raise UserError(_(
-                            "In case of a foreign customer, you need to configure the tax scope on taxes:\n%s",
-                            "\n".join(invoice.line_ids.tax_ids.mapped('name'))
-                        ))
 
                     invoice_node['ImporteTotal'] = float_round(sign * (
                         tax_details_info_service_vals['tax_details']['base_amount']
@@ -493,7 +462,7 @@ class AccountEdiFormat(models.Model):
 
         session = requests.Session()
         session.cert = company.l10n_es_sii_certificate_id
-        session.mount('https://', PatchedHTTPAdapter())
+        session.mount('https://', CertificateAdapter(ciphers=EUSKADI_CIPHERS))
 
         client = zeep.Client(connection_vals['url'], operation_timeout=60, timeout=60, session=session)
 
@@ -651,8 +620,10 @@ class AccountEdiFormat(models.Model):
 
         if not move.company_id.vat:
             res.append(_("VAT number is missing on company %s", move.company_id.display_name))
+        total_taxes = self.env['account.tax']
         for line in move.invoice_line_ids.filtered(lambda line: line.display_type not in ('line_note', 'line_section')):
             taxes = line.tax_ids.flatten_taxes_hierarchy()
+            total_taxes |= taxes
             recargo_count = taxes.mapped('l10n_es_type').count('recargo')
             retention_count = taxes.mapped('l10n_es_type').count('retencion')
             sujeto_count = taxes.mapped('l10n_es_type').count('sujeto')
@@ -670,6 +641,11 @@ class AccountEdiFormat(models.Model):
                 res.append(_("Line %s should only have one no sujeto (localizations) tax.", line.display_name))
             if sujeto_count + no_sujeto_loc_count + no_sujeto_count > 1:
                 res.append(_("Line %s should only have one main tax.", line.display_name))
+        if move.is_inbound() and move.commercial_partner_id._l10n_es_is_foreign() and not any(t.tax_scope for t in total_taxes):
+            res.append(
+                _("In case of a foreign customer, you need to configure the tax scope on taxes:\n%s",
+                  "\n".join(total_taxes.mapped('name')))
+            )
         if move.move_type in ('in_invoice', 'in_refund'):
             if not move.ref:
                 res.append(_("You should put a vendor reference on this vendor bill. "))

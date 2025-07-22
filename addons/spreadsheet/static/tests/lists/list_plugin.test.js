@@ -13,10 +13,12 @@ import {
     getCell,
     getCellContent,
     getCellFormula,
+    getCellFormattedValue,
     getCells,
     getCellValue,
     getEvaluatedCell,
     getEvaluatedGrid,
+    getFormattedValueGrid,
 } from "@spreadsheet/../tests/helpers/getters";
 import { THIS_YEAR_GLOBAL_FILTER } from "@spreadsheet/../tests/helpers/global_filter";
 import { createSpreadsheetWithList } from "@spreadsheet/../tests/helpers/list";
@@ -76,6 +78,37 @@ test("Boolean fields are correctly formatted", async () => {
     const { model } = await createSpreadsheetWithList({ columns: ["bar"] });
     expect(getCellValue(model, "A2")).toBe(true);
     expect(getCellValue(model, "A5")).toBe(false);
+});
+
+test("Numeric/monetary fields are correctly loaded and displayed", async () => {
+    Partner._records.push({
+        id: 5,
+        probability: 0,
+        field_with_array_agg: 0,
+        currency_id: 2,
+        pognon: 0,
+    });
+    const { model } = await createSpreadsheetWithList({
+        columns: ["pognon", "probability", "field_with_array_agg"],
+    });
+
+    // prettier-ignore
+    expect(getFormattedValueGrid(model, "A2:C6")).toEqual({
+        A2: "74.40€",    B2: "10.00",  C2: "1",
+        A3: "$74.80",    B3: "11.00",  C3: "2",
+        A4: "4.00€",     B4: "95.00",  C4: "3",      
+        A5: "$1,000.00", B5: "15.00",  C5: "4",
+        A6: "$0.00",     B6: "0.00",   C6: "0",
+    });
+});
+
+test("Text fields are correctly loaded and displayed", async () => {
+    Partner._records = [{ name: "Record 1" }, { name: false }];
+    const { model } = await createSpreadsheetWithList({
+        columns: ["name"],
+    });
+    expect(getCellFormattedValue(model, "A2")).toBe("Record 1");
+    expect(getCellFormattedValue(model, "A3")).toBe("");
 });
 
 test("properties field displays property display names", async () => {
@@ -724,6 +757,7 @@ test("Preload currency of monetary field", async function () {
                 expect(Object.keys(spec).length).toBe(2);
                 expect(spec.currency_id).toEqual({
                     fields: {
+                        display_name: {},
                         name: {},
                         symbol: {},
                         decimal_places: {},
@@ -734,6 +768,16 @@ test("Preload currency of monetary field", async function () {
             }
         },
     });
+});
+
+test("add currency field after the list has been loaded", async function () {
+    const { model } = await createSpreadsheetWithList({
+        columns: ["pognon"],
+    });
+    setCellContent(model, "A1", '=ODOO.LIST(1, 1, "pognon")');
+    await waitForDataLoaded(model);
+    setCellContent(model, "A2", '=ODOO.LIST(1, 1, "currency_id")');
+    expect(getEvaluatedCell(model, "A2").value).toBe("EUR");
 });
 
 test("fetch all and only required fields", async function () {
@@ -947,7 +991,7 @@ test("can import (export) action xml id", async function () {
                 domain: [],
                 model: "partner",
                 orderBy: [],
-                actionXmlId: "spreadsheet.test_action"
+                actionXmlId: "spreadsheet.test_action",
             },
         },
     };

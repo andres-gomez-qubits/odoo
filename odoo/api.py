@@ -55,6 +55,8 @@ T = typing.TypeVar('T')
 
 _logger = logging.getLogger(__name__)
 
+MAX_FIXPOINT_ITERATIONS = 10
+
 
 class NewId:
     """ Pseudo-ids for new records, encapsulating an optional origin id (actual
@@ -443,6 +445,22 @@ def readonly(method: T) -> T:
     method._readonly = True
     return method
 
+def private(method):
+    """ Decorate a record-style method to indicate that the method cannot be
+        called using RPC. Example::
+
+            @api.private
+            def method(self, args):
+                ...
+
+        If you have business methods that should not be called over RPC, you
+        should prefix them with "_". This decorator may be used in case of
+        existing public methods that become non-RPC callable or for ORM
+        methods.
+    """
+    method._api_private = True
+    return method
+
 _create_logger = logging.getLogger(__name__ + '.create')
 
 
@@ -823,14 +841,27 @@ class Environment(Mapping):
 
     def _recompute_all(self):
         """ Process all pending computations. """
-        for field in list(self.fields_to_compute()):
-            self[field.model_name]._recompute_field(field)
+        for _ in range(MAX_FIXPOINT_ITERATIONS):
+            # fields to compute on real records (new records are not recomputed)
+            fields_ = [field for field, ids in self.transaction.tocompute.items() if any(ids)]
+            if not fields_:
+                break
+            for field in fields_:
+                self[field.model_name]._recompute_field(field)
+        else:
+            _logger.warning("Too many iterations for recomputing fields!")
 
     def flush_all(self):
         """ Flush all pending computations and updates to the database. """
-        self._recompute_all()
-        for model_name in OrderedSet(field.model_name for field in self.cache.get_dirty_fields()):
-            self[model_name].flush_model()
+        for _ in range(MAX_FIXPOINT_ITERATIONS):
+            self._recompute_all()
+            model_names = OrderedSet(field.model_name for field in self.cache.get_dirty_fields())
+            if not model_names:
+                break
+            for model_name in model_names:
+                self[model_name].flush_model()
+        else:
+            _logger.warning("Too many iterations for flushing fields!")
 
     def is_protected(self, field, record):
         """ Return whether `record` is protected against invalidation or

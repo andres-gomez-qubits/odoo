@@ -23,6 +23,12 @@ class TestDefaultView(common.TransactionCase):
             b'<form><sheet string="Test New API Mixed"><group><group><field name="foo"/></group></group><group><field name="text"/></group><group><group><field name="truth"/><field name="number"/><field name="date"/><field name="now"/><field name="reference"/></group><group><field name="count"/><field name="number2"/><field name="moment"/><field name="lang"/></group></group><group><field name="comment1"/></group><group><field name="comment2"/></group><group><field name="comment3"/></group><group><field name="comment4"/></group><group><field name="comment5"/></group><group><group><field name="currency_id"/></group><group><field name="amount"/></group></group><group><separator/></group></sheet></form>'
         )
 
+    def test_default_view_with_binaries(self):
+        self.assertEqual(
+            etree.tostring(self.env['binary.test']._get_default_form_view()),
+            b'<form><sheet string="binary.test"><group><group><field name="img"/></group><group><field name="bin1"/></group></group><group><separator/></group></sheet></form>'
+        )
+
 
 @common.tagged('at_install', 'groups')
 class TestViewGroups(ViewCase):
@@ -204,3 +210,21 @@ class TestViewGroups(ViewCase):
             form.bar = 1  # should make 'name' readonly by onchange modifying sub_bar
             with self.assertRaisesRegex(AssertionError, "can't write on readonly field 'name'"):
                 form.name = 'toto'
+
+    def test_add_properties_definition_field(self):
+        view = self.env['ir.ui.view'].create({
+            'name': 'stuff',
+            'model': 'test_new_api.message',
+            'arch': """
+                <form>
+                    <field name="attributes"/>
+                </form>
+            """,
+        })
+        views = self.env['test_new_api.message'].get_views([(view.id, 'form')])
+        arch = views['views']['form']['arch']
+        form = etree.fromstring(arch)
+        discussion_node = form.find("field[@name='discussion']")
+        self.assertIsNotNone(discussion_node, "the properties definition field `discussion` should be added automatically")
+        self.assertEqual(discussion_node.get("invisible"), "True")
+        self.assertEqual(discussion_node.get("data-used-by"), "fieldname='attributes' (field,attributes)")

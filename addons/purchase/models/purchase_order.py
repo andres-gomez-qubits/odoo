@@ -243,6 +243,8 @@ class PurchaseOrder(models.Model):
                 currency=order.currency_id or order.company_id.currency_id,
                 company=order.company_id,
             )
+            if order.currency_id != order.company_currency_id:
+                order.tax_totals['amount_total_cc'] = f"({formatLang(self.env, order.amount_total_cc, currency_obj=self.company_currency_id)})"
 
     @api.depends('company_id.account_fiscal_country_id', 'fiscal_position_id.country_id', 'fiscal_position_id.foreign_vat')
     def _compute_tax_country_id(self):
@@ -742,7 +744,8 @@ class PurchaseOrder(models.Model):
                 # Merge RFQs into the oldest purchase order
                 rfqs -= oldest_rfq
                 for rfq_line in rfqs.order_line:
-                    existing_line = oldest_rfq.order_line.filtered(lambda l: l.product_id == rfq_line.product_id and
+                    existing_line = oldest_rfq.order_line.filtered(lambda l: l.display_type not in ['line_note', 'line_section'] and
+                                                                                l.product_id == rfq_line.product_id and
                                                                                 l.product_uom == rfq_line.product_uom and
                                                                                 l.product_packaging_id == rfq_line.product_packaging_id and
                                                                                 l.product_packaging_qty == rfq_line.product_packaging_qty and

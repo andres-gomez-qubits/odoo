@@ -3,7 +3,6 @@
 # 	* maintenance
 # 
 # Translators:
-# Hed Shefer <hed@laylinetech.com>, 2024
 # Mor Kir <morki@013.net.il>, 2024
 # Roy Sayag, 2024
 # שהאב חוסיין <shhab89@gmail.com>, 2024
@@ -22,6 +21,7 @@
 # yael terner, 2024
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2024
 # Lilach Gilliam <lilach.gilliam@gmail.com>, 2025
+# Hed Shefer <hed@laylinetech.com>, 2025
 # or balmas, 2025
 # 
 msgid ""
@@ -197,7 +197,7 @@ msgstr "סטטוס"
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_status
 msgid "Alias status assessed on the last message received."
-msgstr ""
+msgstr "סטטוס כינוי הוערך בהודעה האחרונה שהתקבלה."
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_model_id
@@ -349,7 +349,7 @@ msgstr "עלות"
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.res_config_settings_view_form
 msgid "Create custom worksheet templates"
-msgstr ""
+msgstr "צור תבניות גיליונות עבודה מותאמים אישית"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
@@ -399,7 +399,7 @@ msgstr ""
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.res_config_settings_view_form
 msgid "Custom Worksheets"
-msgstr ""
+msgstr "גיליונות עבודה מותאמים אישית"
 
 #. module: maintenance
 #: model:ir.ui.menu,name:maintenance.menu_m_dashboard
@@ -508,7 +508,7 @@ msgstr "עותק דוא\"ל"
 #. module: maintenance
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment_category__alias_domain
 msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
-msgstr ""
+msgstr "דומיין דוא\"ל, למשל, 'example.com' ב-'odoo@example.com'"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_request__repeat_until
@@ -550,7 +550,7 @@ msgstr "קטגורית ציוד"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__equipment_count
 msgid "Equipment Count"
-msgstr ""
+msgstr "ספירת ציוד"
 
 #. module: maintenance
 #: model:res.groups,name:maintenance.group_equipment_manager
@@ -565,7 +565,7 @@ msgstr "שם הציוד"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__equipment_properties_definition
 msgid "Equipment Properties"
-msgstr ""
+msgstr "מאפייני ציוד"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_view_form
@@ -814,7 +814,7 @@ msgstr "תאריך תקלה אחרון"
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment_category__alias_incoming_local
 msgid "Local-part based incoming detection"
-msgstr "זיהוי נכנסות מבוסס חלק מקומי"
+msgstr "זיהוי הודעות נכנסות מבוסס על החלק המקומי בכתובת"
 
 #. module: maintenance
 #: model:ir.model.fields,field_description:maintenance.field_maintenance_equipment__location
@@ -1314,7 +1314,7 @@ msgstr "בקשה בוצעה"
 #. odoo-python
 #: code:addons/maintenance/models/maintenance.py:0
 msgid "Request planned for %s"
-msgstr ""
+msgstr "בקשה מתוכננת ל - %s"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_form
@@ -1521,7 +1521,7 @@ msgstr "המשתמש יוכל לנהל ציוד."
 #: model:ir.model.fields,help:maintenance.field_maintenance_equipment__effective_date
 #: model:ir.model.fields,help:maintenance.field_maintenance_mixin__effective_date
 msgid "This date will be used to compute the Mean Time Between Failure."
-msgstr ""
+msgstr "תאריך זה ישמש לחישוב הזמן הממוצע בין תקלות."
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_search
@@ -1669,7 +1669,7 @@ msgstr ""
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_category_view_form
 msgid "e.g. mycompany.com"
-msgstr ""
+msgstr "למשל, e.g. mycompany.com"
 
 #. module: maintenance
 #: model_terms:ir.ui.view,arch_db:maintenance.hr_equipment_request_view_graph

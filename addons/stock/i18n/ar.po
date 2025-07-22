@@ -5,16 +5,16 @@
 # Translators:
 # Mustafa Rawi <mustafa@mrawi.com>, 2024
 # Mustafa J. Kadhem <safi2266@gmail.com>, 2024
-# Wil Odoo, 2024
-# Malaz Abuidris <msea@odoo.com>, 2024
+# Malaz Abuidris <msea@odoo.com>, 2025
+# Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:02+0000\n"
+"POT-Creation-Date: 2025-07-11 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2024\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -506,6 +506,8 @@ msgid ""
 "<br>If the products are not available in <b>%s</b>, a rule will be triggered"
 " to bring the missing quantity in this location."
 msgstr ""
+"<br>إذا لم تكن المنتجات متاحة في <b>%s</b>, سيتم تشغيل قاعدة لجلب الكمية "
+"الناقصة في هذا الموقع. "
 
 #. module: stock
 #. odoo-python
@@ -781,6 +783,11 @@ msgid "<strong>Customer Address</strong>"
 msgstr "<strong>عنوان العميل</strong>"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
+msgid "<strong>Delivered</strong>"
+msgstr "<strong>الكمية التي قد تم توصيلها</strong>"
+
+#. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<strong>Delivery address</strong>"
 msgstr "<strong>عنوان التوصيل</strong> "
@@ -820,6 +827,11 @@ msgstr "<strong>الحد الأدنى للكمية:</strong> "
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<strong>Order</strong>"
 msgstr "<strong>الطلب</strong> "
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
+msgid "<strong>Ordered</strong>"
+msgstr "<strong>المطلوبة</strong> "
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
@@ -1931,6 +1943,13 @@ msgstr "حساب تكاليف الشحن والشحن عبر DHL"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Compute shipping costs and ship with Easypost"
 msgstr "حساب تكاليف الشحن والشحن من خلال Easypost"
 
@@ -1938,6 +1957,13 @@ msgstr "حساب تكاليف الشحن والشحن من خلال Easypost"
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Compute shipping costs and ship with FedEx"
 msgstr "حساب تكاليف الشحن والشحن عبر FedEx"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1961,8 +1987,22 @@ msgstr "حساب تكاليف الشحن والشحن عبر UPS"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Compute shipping costs and ship with USPS"
 msgstr "حساب تكاليف الشحن والشحن عبر USPS"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -2481,6 +2521,11 @@ msgstr "DEMO_SOURCE_DISPLAY_NAME"
 #: model_terms:ir.ui.view,arch_db:stock.report_reception_body
 msgid "DEMO_UOM"
 msgstr "DEMO_UOM"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid "DHL Connector"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_dhl
@@ -3157,6 +3202,7 @@ msgid "Do you confirm you want to scrap"
 msgstr "هل أنت متأكد من أنك ترغب في التخلص من "
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_type_form
 msgid "Documentation"
 msgstr "التوثيق"
@@ -3390,6 +3436,7 @@ msgstr "فبراير"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_fedex
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "FedEx Connector"
 msgstr "موصل FedEx"
 
@@ -5402,7 +5449,7 @@ msgstr "عدد بنود الحركة "
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_return_picking_line__move_quantity
 msgid "Move Quantity"
-msgstr ""
+msgstr "كمية حركة المخزون "
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move__origin_returned_move_id
@@ -5542,7 +5589,7 @@ msgstr "مطلقًا"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move__never_product_template_attribute_value_ids
 msgid "Never attribute Values"
-msgstr ""
+msgstr "قيم الخصائص التي لا يجب استخدامها "
 
 #. module: stock
 #. odoo-python
@@ -6609,6 +6656,8 @@ msgid ""
 "Press the \"New\" button to define the quantity for a product in your stock "
 "or import quantities from a spreadsheet via the Actions menu"
 msgstr ""
+"اضغط على زر ”جديد“ لتحديد كمية منتج في مخزونك أو استيراد الكميات من جدول "
+"بيانات من خلال قائمة الإجراءات  "
 
 #. module: stock
 #. odoo-javascript
@@ -7629,7 +7678,7 @@ msgstr "تجديد المخزون عند الطلب (الإنتاج حسب ال�
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_product_replenish
 msgid "Replenish wizard"
-msgstr "معالج نجديد المخزون "
+msgstr "معالج تجديد المخزون "
 
 #. module: stock
 #. odoo-javascript
@@ -7805,7 +7854,7 @@ msgstr "إرجاع "
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_stock_return_picking_form
 msgid "Return All"
-msgstr ""
+msgstr "إرجاع الكل "
 
 #. module: stock
 #: model:ir.model,name:stock.model_stock_return_picking
@@ -9046,6 +9095,16 @@ msgstr "رقم المجموعة/الرقم التسلسلي (%s) مرتبط بم
 
 #. module: stock
 #. odoo-python
+#: code:addons/stock/models/stock_picking.py:0
+msgid ""
+"The Picking Operations report has been deleted so you cannot print at this "
+"time unless the report is restored."
+msgstr ""
+"تم حذف تقرير عمليات الانتقاء لذا لا يمكنك الطباعة في الوقت الحالي ما لم تتم "
+"استعادة التقرير. "
+
+#. module: stock
+#. odoo-python
 #: code:addons/stock/models/stock_quant.py:0
 msgid ""
 "The Serial Number (%(serial_number)s) is already used in location(s): %(location_list)s.\n"
@@ -9409,6 +9468,8 @@ msgid ""
 "created. However, it is possible to change it afterwards or that the routes "
 "use another one by default."
 msgstr ""
+"هذا هو موقع الوجهة الافتراضي عند إنشاء هذه العملية يدوياً. ومع ذلك، يمكنك "
+"تغييره بعد ذلك أو استخدام مسارات أخرى بشكل افتراضي. "
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_type__default_location_src_id
@@ -9417,6 +9478,8 @@ msgid ""
 " However, it is possible to change it afterwards or that the routes use "
 "another one by default."
 msgstr ""
+"هذا هو موقع المصدر الافتراضي عند إنشاء هذه العملية يدوياً. ومع ذلك، يمكنك "
+"تغييره بعد ذلك أو استخدام مسارات أخرى بشكل افتراضي. "
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_quant__owner_id
@@ -9614,7 +9677,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/stock/models/stock_rule.py:0
 msgid "Time Horizon"
-msgstr ""
+msgstr "الأفق الزمني "
 
 #. module: stock
 #: model:digest.tip,name:stock.digest_tip_stock_1
@@ -10028,11 +10091,13 @@ msgstr "نوع النشاط المستثنى في السجل. "
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_ups
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "UPS Connector"
 msgstr "موصل UPS"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_usps
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "USPS Connector"
 msgstr "موصل USPS"
 
@@ -10660,10 +10725,11 @@ msgstr "عندما يصل المنتج "
 msgid ""
 "When products are needed in <b>%(destination)s</b>, <br> "
 "<b>%(operation)s</b> are created from <b>%(source_location)s</b> to fulfill "
-"the need."
+"the need. %(suffix)s"
 msgstr ""
 "عند الحاجة لمنتجات في <b>%(destination)s</b>، <br> يتم إنشاء "
-"<b>%(operation)s</b> من <b>%(source_location)s</b> لتلبية تلك الحاجة."
+"<b>%(operation)s</b> من <b>%(source_location)s</b> لتلبية تلك الحاجة. "
+"%(suffix)s "
 
 #. module: stock
 #. odoo-python

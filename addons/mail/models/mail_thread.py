@@ -17,6 +17,7 @@ import time
 import threading
 
 from collections import namedtuple
+from collections.abc import Iterable
 from email import message_from_string
 from email.message import EmailMessage
 from xmlrpc import client as xmlrpclib
@@ -28,7 +29,10 @@ from werkzeug import urls
 
 from odoo import _, api, exceptions, fields, models, Command
 from odoo.addons.mail.tools.discuss import Store
-from odoo.addons.mail.tools.web_push import push_to_end_point, DeviceUnreachableError
+from odoo.addons.mail.tools.web_push import (
+    push_to_end_point, DeviceUnreachableError,
+    ENCRYPTION_BLOCK_OVERHEAD, ENCRYPTION_HEADER_SIZE, MAX_PAYLOAD_SIZE
+)
 from odoo.exceptions import MissingError, AccessError
 from odoo.osv import expression
 from odoo.tools import (
@@ -141,7 +145,13 @@ class MailThread(models.AbstractModel):
 
     @api.model
     def _search_message_partner_ids(self, operator, operand):
-        """Search function for message_follower_ids"""
+        if not (self.env.su or self.env.user._is_internal()):
+            user_partner = self.env.user.partner_id
+            allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)
+            operand_values = operand if isinstance(operand, Iterable) else [operand]
+            if not allow_partner_ids.issuperset(operand_values):
+                raise AccessError(self.env._("Portal users can only filter threads by themselves as followers."))
+
         neg = ''
         if operator in expression.NEGATIVE_TERM_OPERATORS:
             neg = 'not '
@@ -405,18 +415,6 @@ class MailThread(models.AbstractModel):
             return super().get_empty_list_help(f"<p class='o_view_nocontent_smiling_face'>{dyn_help}</p>")
 
         return super().get_empty_list_help(help_message)
-
-    def _condition_to_sql(self, alias: str, fname: str, operator: str, value, query: Query) -> SQL:
-        if self.env.su or self.env.user._is_internal():
-            return super()._condition_to_sql(alias, fname, operator, value, query)
-        if fname != 'message_partner_ids':
-            return super()._condition_to_sql(alias, fname, operator, value, query)
-        user_partner = self.env.user.partner_id
-        allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)
-        operand = value if isinstance(value, (list, tuple)) else [value]
-        if not allow_partner_ids.issuperset(operand):
-            raise AccessError("Portal users can only filter threads by themselves as followers.")
-        return super(MailThread, self.sudo())._condition_to_sql(alias, fname, operator, value, query)
 
     # ------------------------------------------------------
     # MODELS / CRUD HELPERS
@@ -1401,17 +1399,10 @@ class MailThread(models.AbstractModel):
         if strip_attachments:
             msg_dict.pop('attachments', None)
 
-        message_ids = [msg_dict['message_id']]
-        if msg_dict.get('x_odoo_message_id'):
-            message_ids.append(msg_dict['x_odoo_message_id'])
-        existing_msg_ids = self.env['mail.message'].search([('message_id', 'in', message_ids)], limit=1)
+        existing_msg_ids = self.env['mail.message'].search([('message_id', '=', msg_dict['message_id'])], limit=1)
         if existing_msg_ids:
-            if msg_dict.get('x_odoo_message_id'):
-                _logger.info('Ignored mail from %s to %s with Message-Id %s / Context Message-Id %s: found duplicated Message-Id during processing',
-                             msg_dict.get('email_from'), msg_dict.get('to'), msg_dict.get('message_id'), msg_dict.get('x_odoo_message_id'))
-            else:
-                _logger.info('Ignored mail from %s to %s with Message-Id %s: found duplicated Message-Id during processing',
-                             msg_dict.get('email_from'), msg_dict.get('to'), msg_dict.get('message_id'))
+            _logger.info('Ignored mail from %s to %s with Message-Id %s: found duplicated Message-Id during processing',
+                         msg_dict.get('email_from'), msg_dict.get('to'), msg_dict.get('message_id'))
             return False
 
         if self._detect_loop_headers(msg_dict):
@@ -1736,7 +1727,6 @@ class MailThread(models.AbstractModel):
             # Very unusual situation, be we should be fault-tolerant here
             message_id = "<%s@localhost>" % time.time()
             _logger.debug('Parsing Message without message-id, generating a random one: %s', message_id)
-        msg_dict['x_odoo_message_id'] = (message.get('X-Odoo-Message-Id') or '').strip()
         msg_dict['message_id'] = message_id.strip()
 
         if message.get('Subject'):
@@ -1820,7 +1810,7 @@ class MailThread(models.AbstractModel):
             - The list of references ids used to find the bounced mail message
         """
         reference_ids = []
-        headers = ('Message-Id', 'X-Odoo-Message-Id', 'X-Microsoft-Original-Message-ID')
+        headers = ('Message-Id', 'X-Microsoft-Original-Message-ID')
         for header in headers:
             value = decode_message_header(message, header)
             references = unfold_references(value)
@@ -3665,14 +3655,29 @@ class MailThread(models.AbstractModel):
             # replace new lines by spaces to conform to email headers requirements
             mail_subject = ' '.join(mail_subject.splitlines())
 
-        # compute references: set references to the parent and add current message just to
+        # compute references: set references to parents likely to be sent and add current message just to
         # have a fallback in case replies mess with Messsage-Id in the In-Reply-To (e.g. amazon
         # SES SMTP may replace Message-Id and In-Reply-To refers an internal ID not stored in Odoo)
         message_sudo = message.sudo()
-        if message_sudo.parent_id:
-            references = f'{message_sudo.parent_id.message_id} {message_sudo.message_id}'
-        else:
-            references = message_sudo.message_id
+        ancestors = self.env['mail.message'].sudo().search(
+            [
+                ('model', '=', message_sudo.model), ('res_id', '=', message_sudo.res_id),
+                ('id', '!=', message_sudo.id),
+                ('subtype_id', '!=', False),  # filters out logs
+                ('message_id', '!=', False),  # ignore records that somehow don't have a message_id (non ORM created)
+            ], limit=32, order='id DESC',  # take 32 last, hoping to find public discussions in it
+        )
+
+        # filter out internal messages, to fetch 'public discussion' first
+        outgoing_types = ('comment', 'auto_comment', 'email', 'email_outgoing')
+        history_ancestors = ancestors.sorted(lambda m: (
+            not m.is_internal and not m.subtype_id.internal,
+            m.message_type in outgoing_types,
+            m.message_type != 'user_notification',  # user notif -> avoid if possible
+        ), reverse=True)  # False before True unless reverse
+        # order from oldest to newest
+        ancestors = history_ancestors[:3].sorted('id')
+        references = ' '.join(m.message_id for m in (ancestors + message_sudo))
         # prepare notification mail values
         base_mail_values = {
             'mail_message_id': message.id,
@@ -4097,31 +4102,17 @@ class MailThread(models.AbstractModel):
 
     def _notify_get_action_link(self, link_type, **kwargs):
         """ Prepare link to an action: view document, follow document, ... """
-        params = {
-            'model': kwargs.get('model', self._name),
-            'res_id': kwargs.get('res_id', self.ids and self.ids[0] or False),
-        }
-        # keep only accepted parameters:
-        # - action (deprecated), token (assign), access_token (view)
-        # - auth_signup: auth_signup_token and auth_login
-        # - portal: pid, hash
-        params.update(dict(
-            (key, value)
-            for key, value in kwargs.items()
-            if key in ('action', 'token', 'access_token', 'auth_signup_token',
-                       'auth_login', 'pid', 'hash')
-        ))
+        params = self._get_action_link_params(link_type, **kwargs)
 
         if link_type in ['view', 'assign', 'follow', 'unfollow']:
             base_link = '/mail/%s' % link_type
         elif link_type == 'controller':
             controller = kwargs.get('controller')
-            params.pop('model')
             base_link = '%s' % controller
         else:
             return ''
 
-        if link_type not in ['view']:
+        if link_type != 'view':
             token = self._encode_link(base_link, params)
             params['token'] = token
 
@@ -4140,6 +4131,28 @@ class MailThread(models.AbstractModel):
         token = '%s?%s' % (base_link, ' '.join('%s=%s' % (key, params[key]) for key in sorted(params)))
         hm = hmac.new(secret.encode('utf-8'), token.encode('utf-8'), hashlib.sha1).hexdigest()
         return hm
+
+    def _get_action_link_params(self, link_type, **kwargs):
+        """ Parameters management for '_notify_get_action_link' """
+        params = {
+            'model': kwargs.get('model', self._name),
+            'res_id': kwargs.get('res_id', self.ids[0] if self else False),
+        }
+        # keep only accepted parameters:
+        # - action (deprecated), token (assign), access_token (view)
+        # - auth_signup: auth_signup_token and auth_login
+        # - portal: pid, hash
+        params.update({
+            key: value
+            for key, value in kwargs.items()
+            if key in ('action', 'token', 'access_token', 'auth_signup_token',
+                       'auth_login', 'pid', 'hash')
+        })
+        if link_type == 'controller':
+            params.pop('model')
+        elif link_type not in ['view', 'assign', 'follow', 'unfollow']:
+            return {}
+        return params
 
     @api.model
     def _extract_model_and_id(self, msg_vals):
@@ -4227,19 +4240,74 @@ class MailThread(models.AbstractModel):
         return bool(res_id) if (res_model and res_model != 'mail.thread') else False
 
     def _truncate_payload(self, payload):
+        r"""Check the payload limit of ~3990 bytes to avoid 413 error return code.
+
+        See `_truncate_payload_get_max_payload_length` for the exact limit.
+
+        When sending a push notification, the entire encrypted json payload should be no more than 4096 bytes in length.
+        To ensure this, when possible, the body contents of the notification are truncated in such a way that the end
+        result will not exceed that limit.
+
+        Example Truncation:
+            We know there is an encryption overhead of 10 bytes, and a total limit of 50 bytes.
+            The payload is `{"messageId": "5291", "body": "A very long text"}`
+            So we have an effective payload length of (50 - 10) = 40.
+            Our full payload is 49 bytes, of which 16 bytes are text we are willing to truncate.
+            We must remove 9 bytes, such that the payload becomes effectively
+            `{"messageId": "5291", "body": "A very "}`
+
+        There are some considerations with this approach. Notably we must consider the full encoded length in bytes.
+        While we encode the payload in utf-8, it is actually transformed into json with `ensure_ascii=True` first.
+        This means this payload, as a python dictionary: {"body": "BØDY"}; Becomes {"body": "B\\u00d8DY"}.
+        Where `00d8` is the unicode codepoint for "Ø", and "\\u" is a json escape sequence.
+
+        In that case we must ensure that the truncated body does not suddenly contain invalid unicode escape sequences.
+        Similarly to how one should not cut an encoded string in the middle of a utf-8 character.
+
+        Example Unicode Truncation:
+            Assume {"body": "BØDY"} needs to be truncated of 3 bytes
+            It should not become {"body": "B\\u00d"}
+            Instead it should become {"body": "B"}
+
+        :param dict payload: Current payload to truncate.
+        :return: The truncated payload;
         """
-        Check the payload limit of 4096 bytes to avoid 413 error return code.
-        If the payload is too big, we trunc the body value.
-        :param dict payload: Current payload to trunc
-        :return: The truncate payload;
-        """
-        payload_length = len(str(payload).encode())
-        body = payload['options']['body']
+        payload_length = len(json.dumps(payload).encode())
+        # json.dumps defaults to translating unicode to hex codepoints (ensure_ascii=True)
+        # hence we need to check the length the body takes up in that format
+        # json string quotes are removed and the body is not encoded as it's already all ASCII
+        body = json.dumps(payload['options']['body'])[1:-1]
         body_length = len(body)
-        if payload_length > 4096:
-            body_max_length = 4096 - payload_length - body_length
-            payload['options']['body'] = body.encode()[:body_max_length].decode(errors="ignore")
+
+        max_length = self._truncate_payload_get_max_payload_length()
+        if payload_length > max_length:
+            body_max_length = max(0, max_length - payload_length + body_length)
+            # truncate to max length and try to loads again
+            # if there's any error, it will be a unicode error
+            # the error position gives us the start of the codepoint
+            # remove everything after that + the preceding escape marker (\u)
+            try:
+                # remove trailing '\' as the error for that is unhelpful
+                truncated_body = body[:body_max_length].rstrip('\\')
+                truncated_body = json.loads(f'"{truncated_body}"')
+            except json.decoder.JSONDecodeError as json_error:
+                truncated_body = json.loads(f'"{body[:json_error.pos - 2]}"')
+            payload['options']['body'] = truncated_body
         return payload
+
+    @staticmethod
+    def _truncate_payload_get_max_payload_length():
+        """Define the maximum length we want for the payload.
+
+        This limit is derived from:
+            - the maximum encrypted payload size we may send to web push servers.
+            - the header required using AES128GCM encryption.
+            - the overhead of encrypting one block. Payload will not exceed 1 block
+            as the point here is to keep everything within the default (and max) block size.
+        For details about encryption overhead sizes, see variable definition in web_push.
+        Currently all of these values are payload-independant.
+        """
+        return MAX_PAYLOAD_SIZE - ENCRYPTION_HEADER_SIZE - ENCRYPTION_BLOCK_OVERHEAD
 
     # ------------------------------------------------------
     # FOLLOWERS API

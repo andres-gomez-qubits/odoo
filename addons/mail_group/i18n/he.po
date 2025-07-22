@@ -15,6 +15,7 @@
 # Yihya Hugirat <hugirat@gmail.com>, 2024
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2024
 # Ha Ketem <haketem@gmail.com>, 2024
+# Hed Shefer <hed@laylinetech.com>, 2025
 # or balmas, 2025
 # 
 msgid ""
@@ -273,7 +274,7 @@ msgstr "סטטוס"
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_status
 msgid "Alias status assessed on the last message received."
-msgstr ""
+msgstr "סטטוס כינוי הוערך בהודעה האחרונה שהתקבלה."
 
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_model_id
@@ -519,7 +520,7 @@ msgstr ""
 #. module: mail_group
 #: model:ir.model.fields,help:mail_group.field_mail_group__alias_domain
 msgid "Email domain e.g. 'example.com' in 'odoo@example.com'"
-msgstr ""
+msgstr "דומיין דוא\"ל, למשל, 'example.com' ב-'odoo@example.com'"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
@@ -635,7 +636,7 @@ msgstr "פעולה לא תקינה ליצירת קישור (%s)"
 #. odoo-python
 #: code:addons/mail_group/models/mail_group_moderation.py:0
 msgid "Invalid email address “%s”"
-msgstr ""
+msgstr "כתובת מייל לא חוקית “%s”"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.invalid_token_subscription
@@ -700,7 +701,7 @@ msgstr "לאפשר לאנשים להצטרף לרשימה, או הוספה יד�
 #. module: mail_group
 #: model:ir.model.fields,field_description:mail_group.field_mail_group__alias_incoming_local
 msgid "Local-part based incoming detection"
-msgstr "זיהוי נכנסות מבוסס חלק מקומי"
+msgstr "זיהוי הודעות נכנסות מבוסס על החלק המקומי בכתובת"
 
 #. module: mail_group
 #: model:ir.model,name:mail_group.model_mail_group
@@ -1459,7 +1460,7 @@ msgstr "לדוג' \"ניוזלטר\""
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_view_form
 msgid "e.g. mycompany.com"
-msgstr ""
+msgstr "למשל, e.g. mycompany.com"
 
 #. module: mail_group
 #: model_terms:ir.ui.view,arch_db:mail_group.mail_group_message_view_search

@@ -3,16 +3,16 @@
 # 	* website_event
 # 
 # Translators:
-# Thi Huong Nguyen, 2024
 # Wil Odoo, 2024
+# Thi Huong Nguyen, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:39+0000\n"
+"POT-Creation-Date: 2025-05-23 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Thi Huong Nguyen, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -143,12 +143,12 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.events_list
 msgid "<i class=\"fa fa-map-marker me-2\" title=\"Location\"/>"
-msgstr "<i class=\"fa fa-map-marker me-2\" title=\"Địa điểm\"/>"
+msgstr "<i class=\"fa fa-map-marker me-2\" title=\"Vị trí\"/>"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
 msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/> Online event"
-msgstr "<i class=\"fa fa-map-marker\" title=\"Địa điểm\"/> Sự kiện online"
+msgstr "<i class=\"fa fa-map-marker\" title=\"Vị trí\"/> Sự kiện online"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
@@ -519,7 +519,7 @@ msgstr "Xác nhận Đăng ký"
 #. module: website_event
 #: model:event.question.answer,name:website_event.event_7_question_0_answer_0
 msgid "Consumers"
-msgstr "Người tiêu thụ"
+msgstr "Người tiêu dùng"
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_location
@@ -656,7 +656,7 @@ msgstr "Thông tin sự kiện"
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.template_location
 msgid "Event Location"
-msgstr "Địa điểm Sự kiện"
+msgstr "Vị trí Sự kiện"
 
 #. module: website_event
 #: model:ir.model.fields,field_description:website_event.field_event_event__menu_id
@@ -1327,7 +1327,7 @@ msgstr "Menu phụ (Cụ thể)"
 #. odoo-python
 #: code:addons/website_event/controllers/main.py:0
 msgid "Suspicious activity detected by Google reCaptcha."
-msgstr "Hoạt động đáng ngờ được Google reCaptcha phát hiện"
+msgstr "Google reCaptcha phát hiện hoạt động đáng ngờ. "
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
@@ -1401,6 +1401,12 @@ msgstr "Trên"
 #: model_terms:ir.ui.view,arch_db:website_event.snippet_options
 msgid "Top Bar Filter"
 msgstr "Bộ lọc thanh trên"
+
+#. module: website_event
+#. odoo-python
+#: code:addons/website_event/models/website_visitor.py:0
+msgid "Unsupported 'Not In' operation on visitors registrations"
+msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_time

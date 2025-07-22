@@ -129,7 +129,7 @@ class AccountChartTemplate(models.AbstractModel):
     # Loading
     # --------------------------------------------------------------------------------
 
-    def try_loading(self, template_code, company, install_demo=False):
+    def try_loading(self, template_code, company, install_demo=False, force_create=True):
         """Check if the chart template can be loaded then proceeds installing it.
 
         :param template_code: code of the chart template to be loaded.
@@ -157,9 +157,9 @@ class AccountChartTemplate(models.AbstractModel):
         if template_code in {'syscohada', 'syscebnl'} and template_code != company.chart_template:
             raise UserError(_("The %s chart template shouldn't be selected directly. Instead, you should directly select the chart template related to your country.", template_code))
 
-        return self._load(template_code, company, install_demo)
+        return self._load(template_code, company, install_demo, force_create)
 
-    def _load(self, template_code, company, install_demo):
+    def _load(self, template_code, company, install_demo, force_create=True ):
         """Install this chart of accounts for the current company.
 
         :param template_code: code of the chart template to be loaded.
@@ -221,7 +221,7 @@ class AccountChartTemplate(models.AbstractModel):
             }
 
         if reload_template:
-            self._pre_reload_data(company, template_data, data)
+            self._pre_reload_data(company, template_data, data, force_create)
             install_demo = False
         data = self._pre_load_data(template_code, company, template_data, data)
         self._load_data(data)
@@ -242,17 +242,17 @@ class AccountChartTemplate(models.AbstractModel):
                 # Do not rollback installation of CoA if demo data failed
                 _logger.exception('Error while loading accounting demo data')
         for subsidiary in company.child_ids:
-            self._load(template_code, subsidiary, install_demo)
+            self._load(template_code, subsidiary, install_demo, force_create)
 
     @api.model
     def _install_demo(self, companies):
         if not isinstance(companies, models.BaseModel):
             companies = self.env['res.company'].browse(companies)
         for company in companies:
-            self.sudo()._load_data(self._get_demo_data(company))
+            self.sudo()._load_data(self._get_demo_data(company), ignore_duplicates=True)
             self._post_load_demo_data(company)
 
-    def _pre_reload_data(self, company, template_data, data):
+    def _pre_reload_data(self, company, template_data, data, force_create=True):
         """Pre-process the data in case of reloading the chart of accounts.
 
         When we reload the chart of accounts, we only want to update fields that are main
@@ -264,7 +264,9 @@ class AccountChartTemplate(models.AbstractModel):
             if prop.startswith('property_'):
                 template_data.pop(prop)
         data.pop('account.reconcile.model', None)
-
+        if 'res.company' in data:
+            data['res.company'][company.id].clear()
+            data['res.company'][company.id].setdefault('anglo_saxon_accounting', company.anglo_saxon_accounting)
         for xmlid, journal_data in list(data.get('account.journal', {}).items()):
             if self.ref(xmlid, raise_if_not_found=False):
                 del data['account.journal'][xmlid]
@@ -301,11 +303,28 @@ class AccountChartTemplate(models.AbstractModel):
         current_taxes = self.env['account.tax'].with_context(active_test=False).search([
             *self.env['account.tax']._check_company_domain(company),
         ])
+
+        current_fiscal_positions =  self.env['account.fiscal.position'].with_context(active_test=False).search([
+            *self.env['account.fiscal.position']._check_company_domain(company),
+        ])
+
+        current_tax_groups = self.env['account.tax.group'].with_context(active_test=False).search([
+            *self.env['account.tax.group']._check_company_domain(company)
+        ])
+
         unique_tax_name_key = lambda t: (t.name, t.type_tax_use, t.tax_scope, t.company_id)
         unique_tax_name_keys = set(current_taxes.mapped(unique_tax_name_key))
         xmlid2tax = {
             xml_id.split('.')[1].split('_', maxsplit=1)[1]: self.env['account.tax'].browse(record)
             for record, xml_id in current_taxes.get_external_id().items() if xml_id.startswith('account.')
+        }
+        xmlid2fiscal_position= {
+            xml_id.split('.')[1].split('_', maxsplit=1)[1]: self.env['account.fiscal.position'].browse(record)
+            for record, xml_id in current_fiscal_positions.get_external_id().items() if xml_id.startswith('account.')
+        }
+        xmlid2tax_group = {
+            xml_id.split('.')[1].split('_', maxsplit=1)[1]: self.env['account.tax.group'].browse(res_id)
+            for res_id, xml_id in current_tax_groups.get_external_id().items() if xml_id.startswith('account.')
         }
         def tax_template_changed(tax, template):
             template_line_ids = [x for x in template.get('repartition_line_ids', []) if x[0] != Command.CLEAR]
@@ -316,27 +335,46 @@ class AccountChartTemplate(models.AbstractModel):
                 or len(template_line_ids) not in (0, len(tax.repartition_line_ids))
             )
 
+        existing_current_year_earnings_account = self.env['account.account'].search([('company_ids', '=', company.id),('account_type', '=', 'equity_unaffected')], limit=1)
         obsolete_xmlid = set()
         skip_update = set()
         for model_name, records in data.items():
             for xmlid, values in records.items():
                 if model_name == 'account.fiscal.position':
-                    # Only add tax mappings containing new taxes
-                    if old_tax_ids := values.pop('tax_ids', []):
-                        new_tax_ids = []
-                        for element in old_tax_ids:
-                            match element:
-                                case Command.CREATE, _, {'tax_src_id': src_id, 'tax_dest_id': dest_id} if (
-                                    not self.ref(src_id, raise_if_not_found=False)
-                                    or (dest_id and not self.ref(dest_id, raise_if_not_found=False))
-                                ):
-                                    new_tax_ids.append(element)
-                        if new_tax_ids:
-                            values['tax_ids'] = new_tax_ids
+                    # if xmlid is not in xmlid2fiscal_position and we do not force create so we will skip_update for that record
+                    if xmlid not in xmlid2fiscal_position and not force_create:
+                        skip_update.add((model_name, xmlid))
+                        continue
+                    # Only add accounts and taxes mappings containing new records
+                    for model in ['account', 'tax']:
+                        if not force_create:  # there can't be new records if we don't create them
+                            values.pop(f'{model}_ids', [])
+                        if old_ids := values.pop(f'{model}_ids', []):
+                            new_ids = []
+                            for element in old_ids:
+                                match element:
+                                    case Command.CREATE, _, (
+                                        {'tax_src_id': src_id, 'tax_dest_id': dest_id}
+                                        | {'account_src_id': src_id, 'account_dest_id': dest_id}
+                                    ) if (
+                                        not self.ref(src_id, raise_if_not_found=False)
+                                        or (dest_id and not self.ref(dest_id, raise_if_not_found=False))
+                                    ):
+                                        new_ids.append(element)
+                            if new_ids:
+                                values[f'{model}_ids'] = new_ids
+
+                elif model_name == 'account.tax.group':
+                    if xmlid not in xmlid2tax_group and not force_create:
+                        skip_update.add((model_name, xmlid))
+                        continue
 
                 elif model_name == 'account.tax':
                     # Only update the tags of existing taxes
                     if xmlid not in xmlid2tax or tax_template_changed(xmlid2tax[xmlid], values):
+                        if not force_create:
+                            skip_update.add((model_name, xmlid))
+                            continue
                         if self._context.get('force_new_tax_active'):
                             values['active'] = True
                         if xmlid in xmlid2tax:
@@ -365,6 +403,9 @@ class AccountChartTemplate(models.AbstractModel):
                                         repartition_line_values.clear()
                                         repartition_line_values['tag_ids'] = tags or [Command.clear()]
                 elif model_name == 'account.account':
+                    if  existing_current_year_earnings_account and values['account_type'] == 'equity_unaffected':
+                        skip_update.add((model_name, xmlid))
+                        continue
                     # Point or create xmlid to existing record to avoid duplicate code
                     account = self.ref(xmlid, raise_if_not_found=False)
                     normalized_code = f'{values["code"]:<0{int(template_data.get("code_digits", 6))}}'
@@ -387,7 +428,7 @@ class AccountChartTemplate(models.AbstractModel):
                     # on existing accounts, only tag_ids are to be updated using default data
                     if account and 'tag_ids' in data[model_name][xmlid]:
                         data[model_name][xmlid] = {'tag_ids': data[model_name][xmlid]['tag_ids']}
-                    elif account:
+                    elif account or not force_create:
                         skip_update.add((model_name, xmlid))
 
         for skip_model, skip_xmlid in skip_update:
@@ -431,7 +472,7 @@ class AccountChartTemplate(models.AbstractModel):
         e.g. the account codes' width must be standardized to the code_digits applied.
         The fiscal country code must be put in place before taxes are generated.
         """
-        if 'account_fiscal_country_id' in data['res.company'][company.id]:
+        if 'account_fiscal_country_id' in data.get('res.company', {}).get(company.id, {}):
             fiscal_country = self.ref(data['res.company'][company.id]['account_fiscal_country_id'])
         else:
             fiscal_country = company.account_fiscal_country_id
@@ -738,18 +779,10 @@ class AccountChartTemplate(models.AbstractModel):
                                 template_data[model][xmlid].update(record)
         return template_data
 
-    def _setup_utility_bank_accounts(self, template_code, company, template_data):
-        """Define basic bank accounts for the company.
-
-        - Suspense Account
-        - Outstanding Receipts/Payments Accounts
-        - Cash Difference Gain/Loss Accounts
-        - Liquidity Transfer Account
-        """
-        # Create utility bank_accounts
-        bank_prefix = company.bank_account_code_prefix
-        code_digits = int(template_data.get('code_digits', 6))
-        accounts_data = {
+    def _get_accounts_data_values(self, company, template_data, bank_prefix='', code_digits=0):
+        bank_prefix = bank_prefix or company.bank_account_code_prefix
+        code_digits = code_digits or int(template_data.get('code_digits', 6))
+        return {
             'account_journal_suspense_account_id': {
                 'name': _("Bank Suspense Account"),
                 'prefix': bank_prefix,
@@ -789,6 +822,18 @@ class AccountChartTemplate(models.AbstractModel):
             },
         }
 
+    def _setup_utility_bank_accounts(self, template_code, company, template_data):
+        """Define basic bank accounts for the company.
+
+        - Suspense Account
+        - Outstanding Receipts/Payments Accounts
+        - Cash Difference Gain/Loss Accounts
+        - Liquidity Transfer Account
+        """
+        # Create utility bank_accounts
+        bank_prefix = company.bank_account_code_prefix
+        code_digits = int(template_data.get('code_digits', 6))
+        accounts_data = self._get_accounts_data_values(company, template_data, bank_prefix=bank_prefix, code_digits=code_digits)
         for fname in list(accounts_data):
             if company[fname]:
                 del accounts_data[fname]
@@ -808,8 +853,7 @@ class AccountChartTemplate(models.AbstractModel):
                 company[company_attr_name] = account
 
         # No fields on company
-        is_accounting_installed_next = self.env["ir.module.module"].search([('name', '=', 'accountant')]).state in ('to install', 'installed')
-        if not company.parent_id and not is_accounting_installed_next:
+        if not company.parent_id:
             accounts_data_no_fields = {
                 'account_journal_payment_debit_account_id': {
                     'name': _("Outstanding Receipts"),
@@ -858,12 +902,14 @@ class AccountChartTemplate(models.AbstractModel):
         if taxes_in_country:
             return
 
-        def create_foreign_tax_account(existing_account, additional_label):
+        def create_foreign_tax_account(existing_account, additional_label, reconcilable=False):
             new_code = self.env['account.account'].with_company(company)._search_new_account_code(existing_account.code)
             return self.env['account.account'].create({
                 'name': f"{existing_account.name} - {additional_label}",
                 'code': new_code,
                 'account_type': existing_account.account_type,
+                'reconcile': reconcilable or existing_account.reconcile,
+                'non_trade': existing_account.non_trade,
                 'company_ids': [Command.link(company.id)],
             })
 
@@ -931,31 +977,37 @@ class AccountChartTemplate(models.AbstractModel):
         local_cash_basis_tax = self.env["account.tax"].search([
             *self.env['account.tax']._check_company_domain(company),
             ('country_id', '=', company.account_fiscal_country_id.id),
+            ('tax_exigibility', '=', 'on_payment'),
             ('cash_basis_transition_account_id', '!=', False)
         ], limit=1)
-        for tax_template in tax_data.values():
-            account_xml_id = tax_template.get('cash_basis_transition_account_id')
-            if account_xml_id in existing_accounts:
-                continue
+        has_cash_basis = False
+        for tax_template in sorted(tax_data.values(), key=lambda x: any(rep_line.get('account_id') for _command, _id, rep_line in x.get('repartition_line_ids', [])), reverse=True):
+            if tax_template.get('tax_exigibility') == 'on_payment':
+                has_cash_basis = True
 
-            if local_cash_basis_tax:
-                existing_accounts[account_xml_id] = create_foreign_tax_account(
-                    local_cash_basis_tax.cash_basis_transition_account_id,
-                    _("Cash basis transition account")
-                ).id
-                continue
+                account_xml_id = tax_template.get('cash_basis_transition_account_id')
+                if account_xml_id not in existing_accounts:
+                    if local_cash_basis_tax:
+                        existing_accounts[account_xml_id] = create_foreign_tax_account(
+                            local_cash_basis_tax.cash_basis_transition_account_id,
+                            _("Cash basis transition account"),
+                            reconcilable=True,
+                        ).id
 
-            account_id = [rep_line['account_id'] for _command, _id, rep_line in tax_template['repartition_line_ids'] if rep_line.get('account_id')]
-            if account_id:
-                local_account = self.env['account.account'].browse(existing_accounts[account_id[0]])
-                existing_accounts[account_xml_id] = create_foreign_tax_account(local_account, _("Cash basis transition account")).id
-                continue
-            existing_accounts[account_xml_id] = None
+                    elif account_ids := [rep_line['account_id'] for _command, _id, rep_line in tax_template.get('repartition_line_ids', []) if rep_line.get('account_id')]:
+                        local_account = self.env['account.account'].browse(existing_accounts[account_ids[0]])
+                        existing_accounts[account_xml_id] = create_foreign_tax_account(local_account, _("Cash basis transition account"), reconcilable=True).id
+
+                    else:
+                        existing_accounts[account_xml_id] = None
+
+        if has_cash_basis:
+            company.tax_exigibility = True
 
         # Assign the account based on the map
         for field, account_name in field_and_names:
             for tax_group in tax_group_data.values():
-                tax_group[field] = existing_accounts.get(account_template_xml_id)
+                tax_group[field] = existing_accounts.get(tax_group.get(field))
 
         for tax_template in tax_data.values():
             # This is required because the country isn't provided directly by the template
@@ -968,7 +1020,8 @@ class AccountChartTemplate(models.AbstractModel):
                 rep_line['account_id'] = existing_accounts.get(rep_line.get('account_id'))
 
             account_xml_id = tax_template.get('cash_basis_transition_account_id')
-            tax_template['cash_basis_transition_account_id'] = existing_accounts[account_xml_id]
+            if account_xml_id:
+                tax_template['cash_basis_transition_account_id'] = existing_accounts[account_xml_id]
 
         data = {
             'account.tax.group': tax_group_data,
@@ -1095,7 +1148,7 @@ class AccountChartTemplate(models.AbstractModel):
                 "match_partner": True,
             },
             "reconcile_bill": {
-                "name": 'Create Bill',
+                "name": _('Create Bill'),
                 "sequence": 5,
                 "rule_type": 'writeoff_button',
                 'counterpart_type': 'purchase',
@@ -1155,7 +1208,15 @@ class AccountChartTemplate(models.AbstractModel):
                     format_tag = re.sub(r'\s+', ' ', tag.strip())
                     mapped_tag = tags.get(format_tag)
                     if not mapped_tag:
-                        raise UserError(self.env._('Error while loading the localization. You should probably update your localization app first.'))
+                        country = self.env['res.country'].browse(country_id)
+                        message = self.env._(
+                            'Error while loading the localization: missing tax tag %(tag_name)s for country %(country_name)s. You should probably update your localization app first.',
+                            tag_name=format_tag, country_name=country.name)
+                        if not self._context.get('ignore_missing_tags'):
+                            raise UserError(message)
+                        else:
+                            _logger.error(message)
+                            continue
                     res.append(mapped_tag)
             return res
         return mapping_getter
@@ -1365,7 +1426,9 @@ class AccountChartTemplate(models.AbstractModel):
 
         # Gather translations for records that are created from the chart_template data
         for chart_template, chart_companies in groupby(companies, lambda c: c.chart_template):
-            chart_template_data = template_data or self.env['account.chart.template']._get_chart_template_data(chart_template)
+            chart_template_data = template_data or self.env['account.chart.template'] \
+                .with_context(ignore_missing_tags=True) \
+                ._get_chart_template_data(chart_template)
             chart_template_data.pop('template_data', None)
             for mname, data in chart_template_data.items():
                 for _xml_id, record in data.items():

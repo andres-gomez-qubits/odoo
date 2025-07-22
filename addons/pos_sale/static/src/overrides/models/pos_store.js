@@ -69,6 +69,8 @@ patch(PosStore.prototype, {
     },
     async _getSaleOrder(id) {
         const sale_order = (await this.data.read("sale.order", [id]))[0];
+        const orderlines = await this.data.read("sale.order.line", sale_order.raw.order_line);
+        sale_order.order_line = orderlines;
         return sale_order;
     },
     async settleSO(sale_order, orderFiscalPos) {
@@ -78,6 +80,11 @@ patch(PosStore.prototype, {
         let useLoadedLots = false;
         let userWasAskedAboutLoadedLots = false;
         let previousProductLine = null;
+
+        const converted_lines = await this.data.call("sale.order.line", "read_converted", [
+            sale_order.order_line.map((l) => l.id),
+        ]);
+
         for (const line of sale_order.order_line) {
             if (line.display_type === "line_note") {
                 if (previousProductLine) {
@@ -113,10 +120,12 @@ patch(PosStore.prototype, {
             }
             const newLine = await this.addLineToCurrentOrder(newLineValues, {}, false);
             previousProductLine = newLine;
+
+            const converted_line = converted_lines.find((l) => l.id === line.id);
             if (
                 newLine.get_product().tracking !== "none" &&
                 (this.pickingType.use_create_lots || this.pickingType.use_existing_lots) &&
-                line.pack_lot_ids?.length > 0
+                converted_line.lot_names.length > 0
             ) {
                 if (!useLoadedLots && !userWasAskedAboutLoadedLots) {
                     useLoadedLots = await ask(this.dialog, {
@@ -128,20 +137,20 @@ patch(PosStore.prototype, {
                 if (useLoadedLots) {
                     newLine.setPackLotLines({
                         modifiedPackLotLines: [],
-                        newPackLotLines: (line.lot_names || []).map((name) => ({
+                        newPackLotLines: (converted_line.lot_names || []).map((name) => ({
                             lot_name: name,
                         })),
                     });
                 }
             }
 
-            line.has_valued_move_ids = await this.data.call(
+            converted_line.has_valued_move_ids = await this.data.call(
                 "sale.order.line",
                 "has_valued_move_ids",
-                [line.id]
+                [converted_line.id]
             );
-            newLine.setQuantityFromSOL(line);
-            newLine.set_unit_price(line.price_unit);
+            newLine.setQuantityFromSOL(converted_line);
+            newLine.set_unit_price(converted_line.price_unit);
             newLine.set_discount(line.discount);
 
             const product_unit = line.product_id.uom_id;

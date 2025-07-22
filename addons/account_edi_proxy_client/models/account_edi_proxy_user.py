@@ -142,9 +142,27 @@ class AccountEdiProxyClientUser(models.Model):
             if error_code == 'no_such_user':
                 # This error is also raised if the user didn't exchange data and someone else claimed the edi_identificaiton.
                 self.sudo().active = False
+            if error_code == 'invalid_signature':
+                raise AccountEdiProxyError(
+                    error_code,
+                    _("Invalid signature for request. This might be due to another connection to odoo Access Point "
+                      "server. It can occur if you have duplicated your database. \n\n"
+                      "If you are not sure how to fix this, please contact our support."),
+                )
             raise AccountEdiProxyError(error_code, proxy_error['message'] or False)
 
         return response['result']
+
+    def _get_iap_params(self, company, proxy_type, private_key_sudo):
+        edi_identification = self._get_proxy_identification(company, proxy_type)
+
+        return {
+            'dbuuid': company.env['ir.config_parameter'].get_param('database.uuid'),
+            'company_id': company.id,
+            'edi_identification': edi_identification,
+            'public_key': private_key_sudo._get_public_key_bytes(encoding='pem').decode(),
+            'proxy_type': proxy_type,
+        }
 
     def _register_proxy_user(self, company, proxy_type, edi_mode):
         ''' Generate the public_key/private_key that will be used to encrypt the file, send a request to the proxy
@@ -152,7 +170,10 @@ class AccountEdiProxyClientUser(models.Model):
 
         :param company: the company of the user.
         '''
-        private_key_sudo = self.env['certificate.key'].sudo()._generate_rsa_private_key(company, name=f"{self.id_client}_{self.edi_identification}.key")
+        private_key_sudo = self.env['certificate.key'].sudo()._generate_rsa_private_key(
+            company,
+            name=f"{proxy_type}_{edi_mode}_{company.id}.key",
+        )
         edi_identification = self._get_proxy_identification(company, proxy_type)
         if edi_mode == 'demo':
             # simulate registration
@@ -160,13 +181,10 @@ class AccountEdiProxyClientUser(models.Model):
         else:
             try:
                 # b64encode returns a bytestring, we need it as a string
-                response = self._make_request(self._get_server_url(proxy_type, edi_mode) + '/iap/account_edi/2/create_user', params={
-                    'dbuuid': company.env['ir.config_parameter'].get_param('database.uuid'),
-                    'company_id': company.id,
-                    'edi_identification': edi_identification,
-                    'public_key': private_key_sudo._get_public_key_bytes(encoding='pem').decode(),
-                    'proxy_type': proxy_type,
-                })
+                server_url = self._get_server_url(proxy_type, edi_mode)
+                response = self._make_request(
+                    f'{server_url}/iap/account_edi/2/create_user',
+                    params=self._get_iap_params(company, proxy_type, private_key_sudo))
             except AccountEdiProxyError as e:
                 raise UserError(e.message)
             if 'error' in response:

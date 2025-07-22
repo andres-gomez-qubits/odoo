@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:23+0000\n"
+"POT-Creation-Date: 2025-06-20 18:39+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
@@ -305,7 +305,7 @@ msgstr "Có mặt quá giờ"
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_employee_public__attendance_state
 #: model:ir.model.fields,field_description:hr_attendance.field_res_users__attendance_state
 msgid "Attendance Status"
-msgstr "Trạng thái Chuyên cần"
+msgstr "Trạng thái Chấm công"
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -370,10 +370,11 @@ msgstr "Được phê duyệt tự động"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "Automatically Check-Out Employees based on their working schedule with an "
-"additional tolerance."
+"additional tolerance. Does not apply to employees with a flexible working "
+"schedule."
 msgstr ""
 "Tự động check-out nhân viên dựa trên lịch làm việc của họ với một khoảng sai"
-" số bổ sung."
+" số bổ sung. Không áp dụng cho nhân viên có lịch làm việc linh hoạt."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
@@ -450,7 +451,7 @@ msgstr "Trình duyệt"
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid "Can be converted as Time Off (cfr Time Off configuration)."
-msgstr "Có thể chuyển đổi thành Nghỉ phép (cfr cấu hình Nghỉ phép)."
+msgstr "Có thể chuyển đổi thành Ngày nghỉ (cfr cấu hình Ngày nghỉ)."
 
 #. module: hr_attendance
 #. odoo-python
@@ -481,7 +482,7 @@ msgid ""
 "resources."
 msgstr ""
 "Không thể thực hiện việc đăng xuất cho nhân viên %(empl_name)s, do không tìm"
-" thấy lần đăng nhập tương ứng. Dữ liệu Điểm danh của bạn có thể đã được điều"
+" thấy lần đăng nhập tương ứng. Dữ liệu Chấm công của bạn có thể đã được điều"
 " chỉnh bởi bộ phận nhân sự."
 
 #. module: hr_attendance
@@ -756,7 +757,7 @@ msgstr "Nhận dạng mã PIN của nhân viên"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_attendance_tree
 #: model_terms:ir.ui.view,arch_db:hr_attendance.view_attendance_tree_management
 msgid "Employee attendances"
-msgstr "Điểm danh của nhân viên"
+msgstr "Chấm công của nhân viên"
 
 #. module: hr_attendance
 #: model:ir.actions.act_window,name:hr_attendance.hr_employee_attendance_action_kanban
@@ -916,7 +917,7 @@ msgstr "Giờ hôm nay:"
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "Hr Attendance Search"
-msgstr "Tìm kiếm Điểm danh"
+msgstr "Tìm kiếm Chấm công"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__id
@@ -940,9 +941,10 @@ msgstr "Nhận dạng thủ công"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "If checked, days not covered by an attendance will be visible in the Report."
+" Does not apply to employees with a flexible working schedule."
 msgstr ""
-"Nếu được chọn, những ngày không có trong chấm công sẽ hiển thị trong Báo "
-"cáo."
+"Nếu được chọn, những ngày không có chấm công sẽ hiển thị trong Báo cáo. Điều"
+" này không áp dụng đối với nhân viên có lịch làm việc linh hoạt."
 
 #. module: hr_attendance
 #: model:ir.model.fields,help:hr_attendance.field_hr_attendance__message_needaction
@@ -1154,7 +1156,7 @@ msgstr "Chế độ"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_management_view_filter
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
 msgid "My Attendances"
-msgstr "Điểm danh của tôi"
+msgstr "Chấm công của tôi"
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_management_view_filter
@@ -1169,6 +1171,11 @@ msgid "No Badge defined on employees. Set one to test."
 msgstr ""
 "Không có Thẻ nào được xác định cho nhân viên. Hãy thiết lập một thẻ để kiểm "
 "tra."
+
+#. module: hr_attendance
+#: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__no_validated_overtime_hours
+msgid "No Validated Overtime Hours"
+msgstr "Không có giờ làm thêm được xác thực"
 
 #. module: hr_attendance
 #. odoo-javascript
@@ -1509,14 +1516,14 @@ msgstr "Hôm nay"
 #: model:ir.model.fields,field_description:hr_attendance.field_res_config_settings__overtime_company_threshold
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid "Tolerance Time In Favor Of Company"
-msgstr "Thời gian dung sai cho công ty"
+msgstr "Thời gian dung sai có lợi cho công ty"
 
 #. module: hr_attendance
 #: model:ir.model.fields,field_description:hr_attendance.field_res_company__overtime_employee_threshold
 #: model:ir.model.fields,field_description:hr_attendance.field_res_config_settings__overtime_employee_threshold
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid "Tolerance Time In Favor Of Employee"
-msgstr "Thời gian dung sai cho nhân viên"
+msgstr "Thời gian dung sai có lợi cho nhân viên"
 
 #. module: hr_attendance
 #. odoo-javascript

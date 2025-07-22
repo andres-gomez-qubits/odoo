@@ -1,10 +1,23 @@
+import { Editor } from "@html_editor/editor";
 import { Plugin } from "@html_editor/plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { closestElement } from "@html_editor/utils/dom_traversal";
-import { expect, test } from "@odoo/hoot";
+import { beforeEach, expect, test } from "@odoo/hoot";
+import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { setupEditor } from "./_helpers/editor";
 import { insertText } from "./_helpers/user_actions";
 import { getContent } from "./_helpers/selection";
+
+beforeEach(() => {
+    patchWithCleanup(Editor.prototype, {
+        preparePlugins() {
+            this.config.Plugins = (this.config.Plugins || MAIN_PLUGINS).filter(
+                (plugin) => plugin.id !== "editorVersion"
+            );
+            super.preparePlugins();
+        },
+    });
+});
 
 test("can get content of an Editor", async () => {
     const { el, editor } = await setupEditor("<p>hel[lo] world</p>", {});
@@ -122,5 +135,16 @@ test("Convert self closing t elements to opening/closing tags", async () => {
     );
     expect(editor.getContent().trim().replace(/\s+/g, " ")).toBe(
         '<div> <t t-out="object.partner_id" data-oe-t-inline="true" contenteditable="false"></t> </div>'
+    );
+});
+
+test("Remove `width`, `height` attributes from image and apply them to style", async () => {
+    const { el } = await setupEditor(`
+        <div>
+            <img src="#" width="50%" height="50%">
+        </div>
+    `);
+    expect(el.innerHTML.trim().replace(/\s+/g, " ")).toBe(
+        `<div class="o-paragraph"> <img src="#" style="width: 50%; height: 50%;"> </div>`
     );
 });

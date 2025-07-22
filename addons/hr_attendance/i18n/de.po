@@ -3,14 +3,14 @@
 # 	* hr_attendance
 # 
 # Translators:
-# Larissa Manderfeld, 2024
+# Larissa Manderfeld, 2025
 # Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:23+0000\n"
+"POT-Creation-Date: 2025-06-20 18:39+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: German (https://app.transifex.com/odoo/teams/41243/de/)\n"
@@ -370,10 +370,12 @@ msgstr "Automatisch genehmigt"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "Automatically Check-Out Employees based on their working schedule with an "
-"additional tolerance."
+"additional tolerance. Does not apply to employees with a flexible working "
+"schedule."
 msgstr ""
 "Melden Sie Mitarbeiter basierend auf ihrem Arbeitsplan mit einer "
-"zusätzlichen Toleranz automatisch ab."
+"zusätzlichen Toleranz automatisch ab. Gilt nicht für Mitarbeiter mit "
+"flexiblen Arbeitsplänen."
 
 #. module: hr_attendance
 #: model_terms:ir.ui.view,arch_db:hr_attendance.hr_attendance_view_filter
@@ -945,9 +947,11 @@ msgstr "Manuell identifizieren"
 #: model_terms:ir.ui.view,arch_db:hr_attendance.res_config_settings_view_form
 msgid ""
 "If checked, days not covered by an attendance will be visible in the Report."
+" Does not apply to employees with a flexible working schedule."
 msgstr ""
 "Wenn dieses Kontrollkästchen aktiviert ist, werden die Tage, die nicht durch"
-" eine Anwesenheit abgedeckt sind, im Bericht angezeigt."
+" eine Anwesenheit abgedeckt sind, im Bericht angezeigt. Gilt nicht für "
+"Mitarbeiter mit flexiblen Arbeitsplänen."
 
 #. module: hr_attendance
 #: model:ir.model.fields,help:hr_attendance.field_hr_attendance__message_needaction
@@ -1173,6 +1177,11 @@ msgstr "Mein Team"
 #: code:addons/hr_attendance/static/src/public_kiosk/public_kiosk_app.xml:0
 msgid "No Badge defined on employees. Set one to test."
 msgstr "Kein Ausweis für Mitarbeiter. Hinterlegen Sie einen zum Testen."
+
+#. module: hr_attendance
+#: model:ir.model.fields,field_description:hr_attendance.field_hr_attendance__no_validated_overtime_hours
+msgid "No Validated Overtime Hours"
+msgstr "Keine validierten Überstunden"
 
 #. module: hr_attendance
 #. odoo-javascript

@@ -380,7 +380,7 @@ msgstr "仕訳"
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_account_move_line
 msgid "Journal Item"
-msgstr "仕訳項目"
+msgstr "仕訳明細"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__cost_id
@@ -537,7 +537,7 @@ msgstr "ピッキング"
 #. odoo-python
 #: code:addons/stock_landed_costs/models/stock_landed_cost.py:0
 msgid "Please configure Stock Expense Account for product: %s."
-msgstr "製品：%s の在庫経費勘定を設定してください。"
+msgstr "プロダクト: %s の在庫費用勘定を設定して下さい。"
 
 #. module: stock_landed_costs
 #. odoo-python

@@ -8,6 +8,7 @@ import { onRpc } from "@web/../tests/web_test_helpers";
 import { Plugin } from "@html_editor/plugin";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import { expectElementCount } from "./_helpers/ui_expectations";
 
 describe.tags("desktop");
 describe("visibility", () => {
@@ -58,6 +59,23 @@ describe("visibility", () => {
         await setupEditor("<p>[]<br><br></p>");
         expect(".o_we_power_buttons").not.toBeVisible();
     });
+
+    test("should not overlap with long placeholders", async () => {
+        const placeholder = "This is a very very very very long placeholder";
+        const tempP = document.createElement("p");
+        tempP.innerText = placeholder;
+        tempP.style.width = "fit-content";
+        const { el } = await setupEditor(
+            `<p placeholder="${placeholder}" class="o-we-hint">[]<br></p>`
+        );
+        el.appendChild(tempP);
+        const placeholderWidth = tempP.getBoundingClientRect().width;
+        el.removeChild(tempP);
+        const powerButtons = document.querySelector(
+            'div[data-oe-local-overlay-id="oe-power-buttons-overlay"]'
+        );
+        expect(powerButtons.getBoundingClientRect().left).toEqual(placeholderWidth + 20);
+    });
 });
 
 describe.tags("desktop");
@@ -94,18 +112,16 @@ describe("buttons", () => {
     });
 
     test("should open image selector using power buttons", async () => {
-        onRpc("/web/dataset/call_kw/ir.attachment/search_read", () => {
-            return [
-                {
-                    id: 1,
-                    name: "logo",
-                    mimetype: "image/png",
-                    image_src: "/web/static/img/logo2.png",
-                    access_token: false,
-                    public: true,
-                },
-            ];
-        });
+        onRpc("ir.attachment", "search_read", () => [
+            {
+                id: 1,
+                name: "logo",
+                mimetype: "image/png",
+                image_src: "/web/static/img/logo2.png",
+                access_token: false,
+                public: true,
+            },
+        ]);
         await setupEditor("<p>[]<br></p>");
         click(".o_we_power_buttons .power_button.fa-file-image-o");
         await animationFrame();
@@ -116,14 +132,14 @@ describe("buttons", () => {
         await setupEditor("<p>[]<br></p>");
         click(".o_we_power_buttons .power_button.fa-link");
         await animationFrame();
-        expect(".o-we-linkpopover").toHaveCount(1);
+        await expectElementCount(".o-we-linkpopover", 1);
     });
 
     test("should open powerbox using power buttons", async () => {
         await setupEditor("<p>[]<br></p>");
         click(".o_we_power_buttons .power_button.fa-ellipsis-v");
         await animationFrame();
-        expect(".o-we-powerbox").toHaveCount(1);
+        await expectElementCount(".o-we-powerbox", 1);
     });
 });
 

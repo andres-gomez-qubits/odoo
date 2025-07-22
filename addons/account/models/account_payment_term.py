@@ -265,6 +265,12 @@ class AccountPaymentTerm(models.Model):
             return None
         return format_date(self.env, self._get_last_discount_date(date_ref))
 
+    def copy_data(self, default=None):
+        default = dict(default or {})
+        vals_list = super().copy_data(default=default)
+        return [dict(vals, name=_("%s (copy)", line.name)) for line, vals in zip(self, vals_list)]
+
+
 class AccountPaymentTermLine(models.Model):
     _name = "account.payment.term.line"
     _description = "Payment Terms Line"

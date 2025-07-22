@@ -8,6 +8,7 @@ import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { ChatBubble } from "./chat_bubble";
+import { isMobileOS } from "@web/core/browser/feature_detection";
 
 export class ChatHub extends Component {
     static components = { ChatBubble, ChatWindow, Dropdown };
@@ -48,6 +49,10 @@ export class ChatHub extends Component {
         });
     }
 
+    get isMobileOS() {
+        return isMobileOS();
+    }
+
     onResize() {
         this.chatHub.onRecompute();
     }
@@ -70,7 +75,7 @@ export class ChatHub extends Component {
     }
 
     get isShown() {
-        return !this.ui.isSmall;
+        return true;
     }
 
     expand() {
@@ -80,4 +85,10 @@ export class ChatHub extends Component {
     }
 }
 
-registry.category("main_components").add("mail.ChatHub", { Component: ChatHub });
+export const chatHubService = {
+    dependencies: ["bus.monitoring_service", "mail.store", "ui"],
+    start() {
+        registry.category("main_components").add("mail.ChatHub", { Component: ChatHub });
+    },
+};
+registry.category("services").add("mail.chat_hub", chatHubService);

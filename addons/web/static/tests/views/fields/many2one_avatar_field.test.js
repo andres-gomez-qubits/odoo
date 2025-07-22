@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { getActiveElement, queryAll, queryAllTexts, queryOne } from "@odoo/hoot-dom";
+import { queryAll, queryAllTexts } from "@odoo/hoot-dom";
 import { runAllTimers } from "@odoo/hoot-mock";
 
 import {
@@ -318,7 +318,6 @@ test("widget many2one_avatar in kanban view (load more dialog)", async () => {
 
     Users._views = {
         list: '<list><field name="display_name"/></list>',
-        search: "<search/>",
     };
     await mountView({
         type: "kanban",
@@ -375,7 +374,7 @@ test("widget many2one_avatar in kanban view", async () => {
     await contains(
         ".o_kanban_record:nth-child(4) .o_field_many2one_avatar .o_m2o_avatar > .o_quick_assign"
     ).click();
-    expect(getActiveElement()).toBe(queryOne(".o-overlay-container input"));
+    expect(".o-overlay-container input").toBeFocused();
     // select first input
     await contains(".o-overlay-container .o-autocomplete--dropdown-item").click();
     expect(

@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
+"POT-Creation-Date: 2025-05-07 20:36+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
 "Last-Translator: Junko Augias, 2025\n"
 "Language-Team: Japanese (https://app.transifex.com/odoo/teams/41243/ja/)\n"
@@ -322,7 +322,7 @@ msgid ""
 "Counterpart journal items for all incoming stock moves will be posted in this account, unless there is a specific valuation account\n"
 "                set on the source location. This is the default value for all products in this category. It can also directly be set on each product."
 msgstr ""
-"全ての入荷在庫移動の相手仕訳項目は、移動元に特定の評価勘定が設定されていない限り、この勘定に計上されます。\n"
+"全ての入荷在庫移動の相手仕訳明細は、移動元に特定の評価勘定が設定されていない限り、この勘定に計上されます。\n"
 "　　　　これは、このカテゴリの全プロダクトのデフォルト値です。各プロダクトに直接設定することもできます。"
 
 #. module: stock_account
@@ -377,7 +377,7 @@ msgstr "自動在庫評価の場合に会計仕訳に適用される日付。指
 #. module: stock_account
 #: model:ir.model.fields,help:stock_account.field_stock_valuation_layer__uom_id
 msgid "Default unit of measure used for all stock operations."
-msgstr "すべての在庫操作に使用されるデフォルトの測定単位。"
+msgstr "すべての在庫操作に使用されるデフォルトの単位。"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__description
@@ -441,7 +441,7 @@ msgstr "チェックを入れた場合、評価はロット/シリアル番号�
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.view_inventory_valuation_search
 msgid "Incoming"
-msgstr "入荷"
+msgstr "入荷予定"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_location
@@ -485,7 +485,7 @@ msgstr "仕訳"
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_account_move_line
 msgid "Journal Item"
-msgstr "仕訳項目"
+msgstr "仕訳明細"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_res_config_settings__module_stock_landed_costs
@@ -551,7 +551,7 @@ msgstr "ロット/シリアル番号は、ロットごとに評価されるプ�
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.res_config_settings_view_form
 msgid "Lots & Serial numbers will appear on the invoice"
-msgstr "ロット&シリアル番号が請求書に表示されます"
+msgstr "ロット/シリアル番号が請求書に表示されます"
 
 #. module: stock_account
 #: model:ir.model.fields.selection,name:stock_account.selection__product_category__property_valuation__manual_periodic
@@ -721,12 +721,12 @@ msgstr "残数量"
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_stock_valuation_layer__remaining_value
 msgid "Remaining Value"
-msgstr "残額"
+msgstr "残在庫価値"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_stock_return_picking_line
 msgid "Return Picking Line"
-msgstr "ピッキングラインを返す"
+msgstr "返品ピッキング明細"
 
 #. module: stock_account
 #. odoo-python
@@ -973,7 +973,7 @@ msgstr "残数量合計"
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_report_tree
 #: model_terms:ir.ui.view,arch_db:stock_account.stock_valuation_layer_tree
 msgid "Total Remaining Value"
-msgstr "残価合計"
+msgstr "残在庫価値合計"
 
 #. module: stock_account
 #: model:ir.model.fields,field_description:stock_account.field_product_product__total_value
@@ -1170,6 +1170,7 @@ msgstr "プロダクトの在庫を再評価するウィザードモデル"
 
 #. module: stock_account
 #. odoo-python
+#: code:addons/stock_account/models/stock_lot.py:0
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid "You cannot adjust the valuation of a layer with zero quantity"
 msgstr "数量がゼロのレイヤの評価を調整することはできません。"

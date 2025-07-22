@@ -389,6 +389,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         lines to the moves and edit a last time the ordered quantities. Deliver, check the
         quantities.
         """
+        self.env.ref('product.decimal_product_uom').digits = 0
         uom_unit = self.env.ref('uom.product_uom_unit')
         uom_dozen = self.env.ref('uom.product_uom_dozen')
         item1 = self.company_data['product_order_no']
@@ -398,13 +399,11 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         # sell a dozen
         so1 = self.env['sale.order'].create({
             'partner_id': self.partner_a.id,
-            'order_line': [(0, 0, {
-                'name': item1.name,
-                'product_id': item1.id,
-                'product_uom_qty': 1,
-                'product_uom': uom_dozen.id,
-                'price_unit': item1.list_price,
-            })],
+            'order_line': [
+                Command.create({'name': "UoM Test", 'display_type': 'line_note'}),
+                Command.create({'product_id': item1.id, 'product_uom': uom_dozen.id}),
+                Command.create({'name': "Downpayment", 'is_downpayment': True}),
+            ],
         })
         so1.action_confirm()
 
@@ -417,9 +416,10 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         self.assertEqual(move1.product_qty, 12)
 
         # edit the so line, sell 2 dozen, the move should now be 24 units
+        product_line = so1.order_line.filtered('product_id')
         so1.write({
             'order_line': [
-                (1, so1.order_line.id, {'product_uom_qty': 2}),
+                Command.update(product_line.id, {'product_uom_qty': 2}),
             ]
         })
         # The above will create a second move, and then the two moves will be merged in _merge_moves`
@@ -445,7 +445,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         self.env['ir.config_parameter'].sudo().set_param('stock.propagate_uom', '1')
         so1.write({
             'order_line': [
-                (1, so1.order_line.id, {'product_uom_qty': 3}),
+                Command.update(product_line.id, {'product_uom_qty': 3}),
             ]
         })
         move2 = so1.picking_ids.move_ids.filtered(lambda m: m.product_uom.id == uom_dozen.id)
@@ -459,7 +459,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         so1.picking_ids.button_validate()
 
         # check the delivered quantity
-        self.assertEqual(so1.order_line.qty_delivered, 3.0)
+        self.assertEqual(product_line.qty_delivered, 3.0)
 
     def test_07_forced_qties(self):
         """ Make multiple sale order lines of the same product which isn't available in stock. On
@@ -1265,6 +1265,41 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         self.assertEqual(sol.product_uom_qty, 0)
         self.assertEqual(sol.qty_delivered, -2)
         self.assertEqual(sol.order_id, sale_order)
+
+    def test_return_for_exchange_and_cancel_sol_qty(self):
+        """
+        SO, deliver, generate the return for exchange
+        Process the return
+        Then, SOL qty to 0
+        The new delivery should be canceled
+        """
+        warehouse = self.company_data['default_warehouse']
+        stock_location = warehouse.lot_stock_id
+        customer_location = self.env.ref('stock.stock_location_customers')
+
+        so = self._get_new_sale_order()
+        so.action_confirm()
+
+        delivery = so.picking_ids
+        delivery.move_ids.write({'quantity': 10, 'picked': True})
+        delivery.button_validate()
+
+        return_picking_form = Form(self.env['stock.return.picking'].with_context(active_id=delivery.id, active_model='stock.picking'))
+        with return_picking_form.product_return_moves.edit(0) as line:
+            line.quantity = 10
+        return_wizard = return_picking_form.save()
+        res = return_wizard.action_create_exchanges()
+
+        return_picking = self.env['stock.picking'].browse(res['res_id'])
+        return_picking.move_ids.write({'quantity': 10, 'picked': True})
+        return_picking.button_validate()
+
+        so.order_line.product_uom_qty = 0
+        self.assertRecordValues(so.picking_ids.move_ids.sorted(key='id'), [
+            {'location_id': stock_location.id, 'location_dest_id': customer_location.id, 'state': 'done'},
+            {'location_id': customer_location.id, 'location_dest_id': stock_location.id, 'state': 'done'},
+            {'location_id': stock_location.id, 'location_dest_id': customer_location.id, 'state': 'cancel'},
+        ])
 
     def test_return_multisteps_receipt(self):
         """test extra product returned are added to the sale order only once in 3 steps receipt"""
@@ -2166,3 +2201,141 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         self.assertEqual(so.picking_ids[0].state, 'done')
         self.assertEqual(so.picking_ids[1].move_ids.move_line_ids[0].location_dest_id, child_location_1)
         self.assertEqual(so.picking_ids[1].move_ids.move_line_ids[1].location_dest_id, child_location_2)
+
+    def test_custom_delivery_route_new_sale_line(self):
+        """
+        Create a custom delivery route Stock -> Transit -> Customer that uses pull rules.
+        Ensure that the validating the move from Stock to Transit does NOT create a new SaleOrderLine.
+        """
+        warehouse = self.company_data['default_warehouse']
+        stock_location = warehouse.lot_stock_id
+        customer_location = self.env.ref('stock.stock_location_customers')
+        transit_location = self.env['stock.location'].create({
+            'name': 'Transit',
+            'usage': 'transit',
+            'location_id': warehouse.view_location_id.id,
+        })
+        warehouse.pick_type_id.default_location_dest_id = transit_location
+
+        warehouse.delivery_route_id = self.env['stock.route'].create({
+            'name': '2 Steps Pull Delivery Route',
+            'warehouse_selectable': True,
+            'warehouse_ids': [(4, warehouse.id)],
+            'rule_ids': [
+                Command.create({
+                    'name': 'Stock to Output',
+                    'action': 'pull',
+                    'location_src_id': stock_location.id,
+                    'location_dest_id': transit_location.id,
+                    'picking_type_id': warehouse.pick_type_id.id,
+                    'procure_method': 'make_to_stock',
+                }),
+                Command.create({
+                    'name': 'Output to Customer',
+                    'action': 'pull',
+                    'location_src_id': transit_location.id,
+                    'location_dest_id': customer_location.id,
+                    'picking_type_id': warehouse.out_type_id.id,
+                    'procure_method': 'make_to_order',
+                })
+            ]
+        })
+
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [Command.create({
+                'name': 'Test Product',
+                'product_id': self.product_a.id,
+                'product_uom_qty': 1.0,
+                'price_unit': 1.0,
+            })],
+        })
+        sale_order.action_confirm()
+
+        # Ensure the created pickings follow the expected route
+        pickings = sale_order.picking_ids
+        self.assertEqual(len(pickings), 2, "Expected two pickings: Stock->Output and Output->Customer")
+        self.assertEqual(pickings[0].location_id, stock_location)
+        self.assertEqual(pickings[0].location_dest_id, transit_location)
+        self.assertEqual(pickings[1].location_id, transit_location)
+        self.assertEqual(pickings[1].location_dest_id, customer_location)
+
+        pickings[0].move_ids.picked = True
+        pickings[0].button_validate()
+
+        self.assertEqual(pickings[0].state, 'done')
+        self.assertEqual(len(sale_order.order_line), 1)
+
+    def test_multi_step_product_forecast_availability(self):
+        """
+        Test that forecast availability(icon) widget info on the Sales Order correctly appears green
+        when enough stock is available in a 2-step/3-step delivery.
+        """
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse.delivery_steps = 'pick_ship'
+
+        # Make quantity available for the product.
+        self.env['stock.quant']._update_available_quantity(self.new_product, warehouse.lot_stock_id, 1)
+
+        so = self._get_new_sale_order(product=self.new_product, amount=1)
+        so.action_confirm()
+
+        self.assertEqual(
+            so.picking_ids.move_ids.forecast_availability, 1.0,
+            "Forecast availability should be 1.0 because 1.0 quantity is available."
+            "So forecast availability icon should appear green."
+        )
+        self.assertEqual(
+            so.order_line.free_qty_today, 1.0,
+            "Free quantity today should be 1.0, indicating the quantity is usable for this SO."
+        )
+
+    def test_extra_return_product_so_sequence(self):
+        """
+        Ensure returned products are added to the bottom of the SO
+        """
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                (0, 0, {'product_id': self.product_a.id, 'product_uom_qty': 2, 'sequence': 42}),
+                (0, 0, {'product_id': self.product_b.id, 'product_uom_qty': 3, 'sequence': 43}),
+            ],
+        })
+        sale_order.action_confirm()
+        picking = sale_order.picking_ids
+        picking.button_validate()
+        return_picking_form = Form(self.env['stock.return.picking']
+            .with_context(active_id=picking.id, active_model='stock.picking'))
+        with return_picking_form.product_return_moves.new() as line:
+            line.product_id = self.new_product
+            line.quantity = 4
+        return_wiz = return_picking_form.save()
+        res = return_wiz.action_create_returns()
+        return_pick = self.env['stock.picking'].browse(res['res_id'])
+        return_pick.button_validate()
+        self.assertEqual(sale_order.order_line.mapped('sequence'), [42, 43, 44])
+
+    def test_multicompany_transit_with_one_company_for_user(self):
+        """ Check that the inter-company transit location is created when
+        user has only one allowed company. """
+        company_a = self.env['res.company'].create({'name': 'Company A'})
+        company_b = self.env['res.company'].create({'name': 'Company B'})
+        user_a = self.env['res.users'].create({
+            'name': 'user only in company a',
+            'login': 'user a',
+            'company_id': company_a.id,
+            'company_ids': [Command.link(company_a.id)],
+        })
+        product = self.new_product
+        so = self.env['sale.order'].with_user(user_a).create({
+            'partner_id': company_b.partner_id.id,
+            'order_line': [
+                Command.create({
+                    'product_id': product.id,
+                }),
+            ],
+        })
+        so.action_confirm()
+        intercom_location = self.env.ref('stock.stock_location_inter_company')
+        self.assertEqual(so.picking_ids.location_dest_id, intercom_location)
+        self.assertEqual(so.picking_ids.move_ids.location_dest_id, intercom_location)

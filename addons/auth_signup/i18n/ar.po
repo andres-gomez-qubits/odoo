@@ -3,16 +3,16 @@
 # 	* auth_signup
 # 
 # Translators:
-# Wil Odoo, 2024
-# Malaz Abuidris <msea@odoo.com>, 2024
+# Wil Odoo, 2025
+# Malaz Abuidris <msea@odoo.com>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:39+0000\n"
+"POT-Creation-Date: 2025-03-19 20:36+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2024\n"
+"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -842,7 +842,7 @@ msgstr "يتم إرساله إلى مستخدم البوابة الذي قام �
 #. module: auth_signup
 #: model:mail.template,name:auth_signup.mail_template_user_signup_account_created
 msgid "Settings: New Portal Sign Up"
-msgstr ""
+msgstr "الإعدادات: تسجيل الدخول إلى البوابة الجديدة "
 
 #. module: auth_signup
 #: model:mail.template,name:auth_signup.set_password_email
@@ -899,6 +899,12 @@ msgstr "التسجيل: لم يُعطَ اسم أو شريك للمستخدم ا
 #: model:ir.model.fields,field_description:auth_signup.field_res_users__state
 msgid "Status"
 msgstr "الحالة"
+
+#. module: auth_signup
+#. odoo-python
+#: code:addons/auth_signup/controllers/main.py:0
+msgid "Suspicious activity detected by Google reCaptcha."
+msgstr "تم استشعار نشاط مريب عن طريق Google reCaptcha. "
 
 #. module: auth_signup
 #: model:ir.model.fields,field_description:auth_signup.field_res_config_settings__auth_signup_template_user_id

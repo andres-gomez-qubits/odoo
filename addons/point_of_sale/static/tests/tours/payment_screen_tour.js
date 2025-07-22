@@ -37,11 +37,15 @@ registry.category("web_tour.tours").add("PaymentScreenTour", {
             PaymentScreen.fillPaymentLineAmountMobile("Cash", "10"),
             PaymentScreen.remainingIs("42.8"),
             PaymentScreen.validateButtonIsHighlighted(false),
-            PaymentScreen.clickNumpad("+50"),
-            PaymentScreen.fillPaymentLineAmountMobile("Cash", "60"),
-            PaymentScreen.changeIs("7.2"),
+            PaymentScreen.clickNumpad("5"),
+            PaymentScreen.fillPaymentLineAmountMobile("Cash", "105"),
+            PaymentScreen.changeIs("52.2"),
             PaymentScreen.validateButtonIsHighlighted(true),
-            PaymentScreen.clickPaymentlineDelButton("Cash", "60.0"),
+            PaymentScreen.clickNumpad("+50"),
+            PaymentScreen.fillPaymentLineAmountMobile("Cash", "155"),
+            PaymentScreen.changeIs("102.2"),
+            PaymentScreen.validateButtonIsHighlighted(true),
+            PaymentScreen.clickPaymentlineDelButton("Cash", "155.0"),
 
             // Multiple paymentlines
             PaymentScreen.clickPaymentMethod("Cash"),
@@ -128,7 +132,7 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
         [
             Chrome.startPoS(),
             Dialog.confirm("Open Register"),
-            ProductScreen.addOrderline("Product Test 1.2", "1"),
+            ProductScreen.addOrderline("Product Test 1.20", "1"),
             ProductScreen.clickPayButton(),
 
             PaymentScreen.totalIs("1.20"),
@@ -155,7 +159,7 @@ registry.category("web_tour.tours").add("PaymentScreenRoundingHalfUp", {
             Chrome.clickMenuOption("Orders"),
             Chrome.createFloatingOrder(),
 
-            ProductScreen.addOrderline("Product Test 1.2", "1"),
+            ProductScreen.addOrderline("Product Test 1.20", "1"),
             ProductScreen.clickPayButton(),
 
             PaymentScreen.totalIs("1.20"),
@@ -213,5 +217,21 @@ registry.category("web_tour.tours").add("CashRoundingPayment", {
             PaymentScreen.enterPaymentLineAmount("Cash", "1.98"),
             PaymentScreen.clickValidate(),
             Dialog.is(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("PaymentScreenInvoiceOrder", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.addOrderline("Product Test", "1"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("Partner Test 1"),
+            ProductScreen.clickPayButton(),
+
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickInvoiceButton(),
+            PaymentScreen.clickValidate(),
         ].flat(),
 });

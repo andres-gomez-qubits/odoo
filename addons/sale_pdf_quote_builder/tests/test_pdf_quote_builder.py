@@ -8,7 +8,7 @@ from unittest.mock import patch
 from werkzeug.datastructures import FileStorage
 
 from odoo import Command
-from odoo.tests import tagged
+from odoo.tests import Form, tagged
 from odoo.tools.misc import file_open
 
 from odoo.addons.base.tests.common import BaseUsersCommon
@@ -164,6 +164,52 @@ class TestPDFQuoteBuilder(BaseUsersCommon, SaleManagementCommon):
         # should return all document data regardless of access
         self.assertEqual('Header', dialog_param['headers']['files'][0]['name'])
         self.assertEqual('Product > Test Product', dialog_param['lines'][0]['name'])
+
+    def test_quotation_document_is_removed_on_template_change(self):
+        so_tmpl = self.env['sale.order.template'].create({
+            'name': "test1",
+            'quotation_document_ids': [Command.link(self.header.id)],
+        })
+        so_tmpl_2 = self.env['sale.order.template'].create({'name': "test2"})
+
+        self.sale_order.write({
+            'sale_order_template_id': so_tmpl.id,
+            'quotation_document_ids': [Command.link(self.header.id)],
+        })
+
+        self.assertEqual(self.sale_order.quotation_document_ids, self.header)
+
+        so_form = Form(self.sale_order)
+        so_form.sale_order_template_id = so_tmpl_2
+        so_form.save()
+
+        self.assertIn(self.header, self.sale_order.available_product_document_ids)
+        so_form.record.quotation_document_ids[0].unlink()
+        so_form.save()
+        self.assertNotIn(self.header, self.sale_order.available_product_document_ids)
+        self.assertEqual(len(self.sale_order.quotation_document_ids), 0)
+
+    def test_onchange_product_removes_previously_selected_documents(self):
+        """ Check that changing a line that has a selected document unselect said document. """
+
+        available_doc = self.sale_order.order_line[0].available_product_document_ids
+        self.sale_order.order_line[0].product_document_ids = available_doc  # select the document
+
+        self.assertTrue(available_doc, msg="Default order line should have an available document.")
+        msg = "The available document should have been selected."
+        self.assertEqual(
+            self.sale_order.order_line[0].product_document_ids, available_doc, msg=msg
+        )
+
+        so_form = Form(self.sale_order)
+        with so_form.order_line.edit(0) as line:
+            line.product_id = self._create_product()
+        so_form.save()
+
+        msg = "There shouldn't be any available product documents."
+        self.assertFalse(self.sale_order.order_line[0].available_product_document_ids, msg=msg)
+        msg = "There shouldn't be any selected product documents left."
+        self.assertFalse(self.sale_order.order_line[0].product_document_ids, msg=msg)
 
     def test_quotation_document_upload_no_template(self):
         """Check that uploading quotation documents get assigned the active company."""

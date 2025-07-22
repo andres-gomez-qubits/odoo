@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:22+0000\n"
+"POT-Creation-Date: 2025-06-27 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
 "Last-Translator: Tony Ng, 2025\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
@@ -1412,7 +1412,7 @@ msgid ""
 "your email with anyone else.</small>"
 msgstr ""
 "<small id=\"emailHelp\" class=\"form-text text-"
-"muted\">我們絕對不會向其他人洩漏您的電子郵件地址</small>"
+"muted\">我們絕對不會向其他人洩漏你的電子郵件地址</small>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.header_text_element
@@ -1458,7 +1458,7 @@ msgid ""
 "                            <span class=\"visually-hidden\">Next</span>"
 msgstr ""
 "<span class=\"carousel-control-next-icon\" aria-hidden=\"true\"/>\n"
-"                            <span class=\"visually-hidden\">下一個</span>"
+"                            <span class=\"visually-hidden\">下一頁</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_gallery
@@ -1467,7 +1467,7 @@ msgid ""
 "                        <span class=\"visually-hidden\">Next</span>"
 msgstr ""
 "<span class=\"carousel-control-next-icon\" aria-hidden=\"true\"/>\n"
-"                        <span class=\"visually-hidden\">下一個</span>"
+"                        <span class=\"visually-hidden\">下一頁</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -1478,7 +1478,7 @@ msgid ""
 "                <span class=\"visually-hidden\">Next</span>"
 msgstr ""
 "<span class=\"carousel-control-next-icon\" aria-hidden=\"true\"/>\n"
-"                <span class=\"visually-hidden\">下一個</span>"
+"                <span class=\"visually-hidden\">下一頁</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel_intro
@@ -1487,7 +1487,7 @@ msgid ""
 "                            <span class=\"visually-hidden\">Previous</span>"
 msgstr ""
 "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
-"                            <span class=\"visually-hidden\">上一個</span>"
+"                            <span class=\"visually-hidden\">上一頁</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_gallery
@@ -1496,7 +1496,7 @@ msgid ""
 "                        <span class=\"visually-hidden\">Previous</span>"
 msgstr ""
 "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
-"                        <span class=\"visually-hidden\">上一個</span>"
+"                        <span class=\"visually-hidden\">上一頁</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_quotes_carousel
@@ -1506,7 +1506,7 @@ msgid ""
 "                    <span class=\"visually-hidden\">Previous</span>"
 msgstr ""
 "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
-"                    <span class=\"visually-hidden\">上一個</span>"
+"                    <span class=\"visually-hidden\">上一頁</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -1515,7 +1515,7 @@ msgid ""
 "                <span class=\"visually-hidden\">Previous</span>"
 msgstr ""
 "<span class=\"carousel-control-prev-icon\" aria-hidden=\"true\"/>\n"
-"                <span class=\"visually-hidden\">上一個</span>"
+"                <span class=\"visually-hidden\">上一頁</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_mega_menu_thumbnails
@@ -1859,6 +1859,16 @@ msgstr ""
 "                                <span class=\"h5-fs\">美觀動人的頁面</span>"
 
 #. module: website
+#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
+msgid "<span class=\"s_progress_bar_text small d-none\">25%</span>"
+msgstr "<span class=\"s_progress_bar_text small d-none\">25%</span>"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.s_numbers_charts
+msgid "<span class=\"s_progress_bar_text small d-none\">80%</span>"
+msgstr "<span class=\"s_progress_bar_text small d-none\">80%</span>"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_progress_bar
 msgid "<span class=\"s_progress_bar_text small\">80%</span>"
 msgstr "<span class=\"s_progress_bar_text small\">80%</span>"
@@ -2170,7 +2180,7 @@ msgstr "一系列令人驚嘆的解決方案，依你需要量身設計"
 msgid ""
 "A creamy, smooth cheesecake with a graham cracker crust, topped with a layer"
 " of fresh fruit or chocolate ganache."
-msgstr "濃香幼滑的芝士蛋糕，外殼帶有全麥餅乾，以新鮮水果或巧克力漿鋪面。"
+msgstr "濃香幼滑的芝士蛋糕，外殼帶有全麥餅乾，以新鮮水果或朱古力漿鋪面。"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
@@ -2493,7 +2503,7 @@ msgstr "加入新的社交網絡"
 #: model_terms:ir.ui.view,arch_db:website.s_pricelist_cafe_add_product_widget
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog_add_product_widget
 msgid "Add Product"
-msgstr "添加產品"
+msgstr "加入產品"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_chart_options
@@ -3186,7 +3196,7 @@ msgstr "訪客在頁面停留超過指定時間，便顯示彈出方塊。"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__auto_redirect_lang
 msgid "Autoredirect Language"
-msgstr "語系自動重導"
+msgstr "自動重新導向語言"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -4928,7 +4938,7 @@ msgstr "天 - 小時 - 分 - 秒"
 #. odoo-javascript
 #: code:addons/website/static/src/components/wysiwyg_adapter/wysiwyg_adapter.js:0
 msgid "DRAG BUILDING BLOCKS HERE"
-msgstr "拖曳區塊到這裡"
+msgstr "拖曳區塊至此處"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_alert_options
@@ -5048,7 +5058,7 @@ msgstr "預設輸入樣式"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__default_lang_id
 msgid "Default Language"
-msgstr "預設語系"
+msgstr "預設語言"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__default_layout
@@ -5086,12 +5096,12 @@ msgstr "預設勾選方格"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__website_default_lang_id
 msgid "Default language"
-msgstr "預設語系"
+msgstr "預設語言"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__website_default_lang_code
 msgid "Default language code"
-msgstr "預設語系代碼"
+msgstr "預設語言代碼"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -5598,7 +5608,7 @@ msgstr "推軌變焦"
 #: model:ir.model.fields,field_description:website.field_website_controller_page__record_domain
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Domain"
-msgstr "篩選範圍"
+msgstr "網域"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_controller_page__record_domain
@@ -5957,7 +5967,7 @@ msgstr "電郵及推廣"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Email Marketing"
-msgstr "電郵市場行銷"
+msgstr "電郵推廣"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -6411,7 +6421,7 @@ msgstr "公平定價"
 #: model:ir.model.fields,field_description:website.field_res_config_settings__favicon
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 msgid "Favicon"
-msgstr "網址列圖示"
+msgstr "網頁圖示"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_three_columns
@@ -7336,7 +7346,6 @@ msgstr "標題 1"
 #. module: website
 #. odoo-javascript
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
-#: code:addons/website/static/src/xml/website.editor.xml:0
 msgid "Headings"
 msgstr "標題"
 
@@ -7346,36 +7355,26 @@ msgid "Headings 1"
 msgstr "標題 1"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 2"
 msgstr "標題 2"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 3"
 msgstr "標題 3"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 4"
 msgstr "標題 4"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 5"
 msgstr "標題 5"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
 msgid "Headings 6"
 msgstr "標題 6"
@@ -8169,7 +8168,7 @@ msgstr "加入「分享」小工具。"
 #. odoo-javascript
 #: code:addons/website/static/src/components/wysiwyg_adapter/wysiwyg_adapter.js:0
 msgid "Insert a text Highlight snippet"
-msgstr "加入焦點文字區塊。"
+msgstr "插入焦點文字片段"
 
 #. module: website
 #. odoo-javascript
@@ -8181,7 +8180,7 @@ msgstr "加入警示區塊。"
 #. odoo-javascript
 #: code:addons/website/static/src/components/wysiwyg_adapter/wysiwyg_adapter.js:0
 msgid "Insert an horizontal separator snippet"
-msgstr "加入水平分隔線區塊。"
+msgstr "插入水平分隔線片段"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
@@ -9085,8 +9084,6 @@ msgid "Linkedin"
 msgstr "LinkedIn"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Links"
 msgstr "連結"
@@ -9161,6 +9158,7 @@ msgstr "即時聊天小工具"
 #: code:addons/website/static/src/client_actions/website_preview/website_preview.xml:0
 #: code:addons/website/static/src/components/dialog/add_page_dialog.js:0
 #: code:addons/website/static/src/components/dialog/seo.xml:0
+#: code:addons/website/static/src/js/editor/html_editor.js:0
 #: code:addons/website/static/src/xml/web_editor.xml:0
 #: code:addons/website/static/src/xml/website.background.video.xml:0
 msgid "Loading..."
@@ -11285,12 +11283,6 @@ msgid "Primary"
 msgstr "主要"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Primary Buttons"
-msgstr "主要按鈕"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Primary Style"
 msgstr "主要按鈕樣式"
@@ -11490,6 +11482,11 @@ msgid "Punchy Image"
 msgstr "有力圖片"
 
 #. module: website
+#: model:ir.model.fields,field_description:website.field_website__domain_punycode
+msgid "Punycode Domain"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid "Purpose"
 msgstr "用途"
@@ -11545,7 +11542,7 @@ msgstr "Qweb"
 #. module: website
 #: model:ir.model,name:website.model_ir_qweb_field_contact
 msgid "Qweb Field Contact"
-msgstr "Qweb 聯繫人欄位"
+msgstr "Qweb 欄位聯絡人"
 
 #. module: website
 #: model:ir.model,name:website.model_ir_qweb_field_html
@@ -12273,12 +12270,6 @@ msgid "Secondary"
 msgstr "次要"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
-msgid "Secondary Buttons"
-msgstr "次要按鈕"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Secondary Style"
 msgstr "次要按鈕樣式"
@@ -12448,7 +12439,7 @@ msgstr "伺服器動作"
 #: model_terms:ir.ui.view,arch_db:website.template_footer_links
 #: model_terms:ir.ui.view,arch_db:website.template_footer_minimalist
 msgid "Services"
-msgstr "服務介紹"
+msgstr "服務"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_image_text_overlap
@@ -13358,8 +13349,6 @@ msgid "Test your robots.txt with Google Search Console"
 msgstr "使用 Google 搜尋終端測試您的 robots.txt"
 
 #. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website.editor.xml:0
 #: model_terms:ir.ui.view,arch_db:website.grid_layout_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -13566,6 +13555,12 @@ msgid "The limit must be between 1 and 16."
 msgstr "此限制必須介於 1 到 16 之間."
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/client_actions/configurator/configurator.js:0
+msgid "The logo is too large. Please upload a logo smaller than 2.5 MB."
+msgstr "標誌檔案太大。請上載小於 2.5 MB 的標誌。"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
 msgid "The maximum number of files that can be uploaded."
 msgstr "上載檔案數目上限。"
@@ -13749,7 +13744,7 @@ msgstr "此指導計劃提供專門的力量訓練、營養指導和專家輔導
 #: model:ir.model.fields,help:website.field_res_config_settings__favicon
 #: model:ir.model.fields,help:website.field_website__favicon
 msgid "This field holds the image used to display a favicon on the website."
-msgstr "此欄位存放此網站網址列圖示的圖片."
+msgstr "此欄位存放用作顯示網站圖示的圖片。"
 
 #. module: website
 #. odoo-javascript
@@ -14058,7 +14053,7 @@ msgid ""
 "To add a fourth column, reduce the size of these three columns using the "
 "right icon of each block. Then, duplicate one of the columns to create a new"
 " one as a copy."
-msgstr "要添加第四列，請使用每個塊的右圖示減小這三列的大小。然後，複製其中一列以建立一個新列作為副本。"
+msgstr "若要新增第四個直欄，請使用其餘三欄的右側圖示，縮小這三欄的欄寬。然後，複製其中一欄，建立新的副本。"
 
 #. module: website
 #. odoo-javascript
@@ -14102,7 +14097,8 @@ msgid ""
 "To send invitations in B2B mode, open a contact or select several ones in "
 "list view and click on 'Portal Access Management' option in the dropdown "
 "menu *Action*."
-msgstr "要在 B2B 模式下發出邀請，請開啟一個聯絡人或在清單檢視中選取多人，然後在*動作*下拉選單中點擊「入口網站存取管理」選項."
+msgstr ""
+"若要在 B2B 模式中傳送邀請，請開啟一個聯絡人，或在列表檢視畫面中選擇多個聯絡人，然後在 *動作* 下拉式選單中，按一下「門戶網站存取管理」選項。"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -14349,6 +14345,12 @@ msgstr ""
 " "
 
 #. module: website
+#. odoo-javascript
+#: code:addons/website/static/src/xml/html_editor.xml:0
+msgid "Type your URL"
+msgstr "輸入網址"
+
+#. module: website
 #: model:ir.model.fields,field_description:website.field_website_controller_page__name_slugified
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
 #: model_terms:ir.ui.view,arch_db:website.s_website_form_options
@@ -14367,6 +14369,12 @@ msgstr "網址來自"
 #: model:ir.model.fields,help:website.field_website__cdn_filters
 msgid "URL matching those filters will be rewritten using the CDN Base URL"
 msgstr "符合這些篩選條件的網址會用 CDN 根網址改寫"
+
+#. module: website
+#. odoo-python
+#: code:addons/website/models/website_rewrite.py:0
+msgid "URL must not start with '#'."
+msgstr "網址不能以「#」開頭。"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_rewrite__url_to
@@ -15282,7 +15290,7 @@ msgstr "網站域名應獨一無二。"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__favicon
 msgid "Website Favicon"
-msgstr "網站網址列圖示"
+msgstr "網站圖示"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_ir_model__website_form_key
@@ -15439,7 +15447,7 @@ msgstr "網站選單"
 #: model:ir.model.fields,field_description:website.field_website_page__website_meta_description
 #: model:ir.model.fields,field_description:website.field_website_seo_metadata__website_meta_description
 msgid "Website meta description"
-msgstr "網站 meta 說明"
+msgstr "網站 meta 描述"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_ir_ui_view__website_meta_keywords
@@ -15494,7 +15502,7 @@ msgstr "網站: 分析"
 #. module: website
 #: model:ir.actions.server,name:website.ir_actions_server_website_dashboard
 msgid "Website: Dashboard"
-msgstr "網站: 儀錶板"
+msgstr "網站：Dashboard"
 
 #. module: website
 #: model:ir.actions.act_window,name:website.action_website_list
@@ -15703,12 +15711,6 @@ msgstr "寫一兩段文字，描述你的產品或服務，或個別特色及功
 #: model:ir.model.fields,field_description:website.field_website__social_twitter
 msgid "X Account"
 msgstr "X 帳戶"
-
-#. module: website
-#. odoo-javascript
-#: code:addons/website/static/src/xml/website_form_editor.xml:0
-msgid "Yes"
-msgstr "是"
 
 #. module: website
 #. odoo-javascript
@@ -16059,6 +16061,12 @@ msgid "and"
 msgstr "及"
 
 #. module: website
+#. odoo-python
+#: code:addons/website/models/website_rewrite.py:0
+msgid "base URL of 'URL to' should not be same as 'URL from'."
+msgstr "「導向網址」的基本網址，應與「來源網址」不同。"
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "block, blog, post, catalog, feed, items, entries, entry, collection"
 msgstr "區塊, 方塊, 部落格, 網誌, 帖文, 文章, 目錄, 產品目錄, 提要, 訊息流, 項目, 條目, 記項, 集合, 系列"
@@ -16331,7 +16339,7 @@ msgstr "電子商務"
 #. module: website
 #: model:website.configurator.feature,name:website.feature_module_elearning
 msgid "eLearning"
-msgstr "網上教學"
+msgstr "網上學習"
 
 #. module: website
 #. odoo-python
