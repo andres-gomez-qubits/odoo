@@ -9,7 +9,7 @@
 				<field name="employee_id" widget="many2one_avatar_user"/>
 				<field name="skill_type_id"/>
 				<field name="skill_id"/>
-				<field name="first_level_progress" widget="percentage" string="First Eval Progress" width="100px"/>
+				<field name="first_level_progress" widget="percentage" string="Firsttt Eval Progress" width="100px"/>
 				<field name="second_level_progress" widget="percentage" string="Second Eval Progress" width="100px"/>
 				<field name="previous_level_progress" widget="percentage" string="Previous Progress" width="100px"/>
 				<field name="current_level_progress" widget="percentage" string="Current Progress" width="100px"/>
