@@ -4,16 +4,16 @@
 # 
 # Translators:
 # Wil Odoo, 2024
-# Odoo哥 <vnsoft.he@gmail.com>, 2024
 # Chloe Wang, 2025
+# 何彬 <vnsoft.he@gmail.com>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-25 08:39+0000\n"
+"POT-Creation-Date: 2025-05-07 20:36+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Chloe Wang, 2025\n"
+"Last-Translator: 何彬 <vnsoft.he@gmail.com>, 2025\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -514,6 +514,8 @@ msgid ""
 "Lot %(lot)s has a negative quantity in stock.\n"
 "Correct this quantity before enabling/disabling lot valuation."
 msgstr ""
+"批次 %(lot)s 的库存数量为负数。\n"
+"启用/停用批次估值之前，请先更正此数量。"
 
 #. module: stock_account
 #. odoo-python
@@ -547,7 +549,7 @@ msgstr "对于按批次估值的产品，必须提供批次/序列号"
 #. module: stock_account
 #: model_terms:ir.ui.view,arch_db:stock_account.res_config_settings_view_form
 msgid "Lots & Serial numbers will appear on the invoice"
-msgstr "发票上将显示批次和序列号"
+msgstr "发票上将显示批次 / 序列号"
 
 #. module: stock_account
 #: model:ir.model.fields.selection,name:stock_account.selection__product_category__property_valuation__manual_periodic
@@ -613,6 +615,8 @@ msgid ""
 "Product %(product)s has quantity in valued location %(location)s without any lot.\n"
 "Please assign lots to all your quantities before enabling lot valuation."
 msgstr ""
+"产品 %(product)s 在估值库位 %(location)s 中有数量，但没有归属批次。\n"
+"启用批次估值之前，请先为所有数量指定批次。"
 
 #. module: stock_account
 #: model:ir.model,name:stock_account.model_product_category
@@ -1160,6 +1164,7 @@ msgstr "重新评估一个产品的库存的向导模型"
 
 #. module: stock_account
 #. odoo-python
+#: code:addons/stock_account/models/stock_lot.py:0
 #: code:addons/stock_account/wizard/stock_valuation_layer_revaluation.py:0
 msgid "You cannot adjust the valuation of a layer with zero quantity"
 msgstr "你无法调整数量为零的估值"

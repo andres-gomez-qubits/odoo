@@ -6,6 +6,7 @@ import {
     edit,
     hover,
     leave,
+    on,
     pointerDown,
     press,
     queryAll,
@@ -14,6 +15,7 @@ import {
     queryOne,
     queryText,
     resize,
+    scroll,
     setInputFiles,
 } from "@odoo/hoot-dom";
 import { Deferred, advanceFrame, animationFrame, runAllTimers, tick } from "@odoo/hoot-mock";
@@ -627,7 +629,7 @@ test("empty group when grouped by date", async () => {
 
     expect(queryAllTexts(".o_kanban_header")).toEqual(["January 2017\n(1)", "February 2017\n(3)"]);
 
-    Partner._records.shift(); // remove only record of the first group
+    MockServer.env["partner"].shift(); // remove only record of the first group
 
     await press("Enter"); // reload
     await animationFrame();
@@ -1580,7 +1582,7 @@ test("kanban with an action id as on_create attrs", async () => {
             // simplified flow in this test: simulate a target new action which
             // creates a record and closes itself
             expect.step(`doAction ${action}`);
-            Partner._records.push({ id: 299, foo: "new" });
+            MockServer.env["partner"].create({ foo: "new" });
             options.onClose();
         },
     });
@@ -3455,7 +3457,7 @@ test("quick create is disabled until record is created and read", async () => {
 
 test.tags("desktop");
 test("quick create record fail in grouped by many2one", async () => {
-    Partner._views["form,false"] = `
+    Partner._views["form"] = `
         <form>
             <field name="product_id"/>
             <field name="foo"/>
@@ -3499,7 +3501,7 @@ test("quick create record fail in grouped by many2one", async () => {
 });
 
 test("quick create record and click Edit, name_create fails", async () => {
-    Partner._views["kanban,false"] = `
+    Partner._views["kanban"] = `
         <kanban sample="1">
             <templates>
                 <t t-name="card">
@@ -3507,9 +3509,8 @@ test("quick create record and click Edit, name_create fails", async () => {
                 </t>
             </templates>
         </kanban>`;
-    Partner._views["search,false"] = "<search/>";
-    Partner._views["list,false"] = '<list><field name="foo"/></list>';
-    Partner._views["form,false"] = `
+    Partner._views["list"] = '<list><field name="foo"/></list>';
+    Partner._views["form"] = `
         <form>
             <field name="product_id"/>
             <field name="foo"/>
@@ -3553,7 +3554,7 @@ test("quick create record and click Edit, name_create fails", async () => {
 
 test.tags("desktop");
 test("quick create record is re-enabled after discard on failure", async () => {
-    Partner._views["form,false"] = `
+    Partner._views["form"] = `
         <form>
             <field name="product_id"/>
             <field name="foo"/>
@@ -3595,7 +3596,7 @@ test("quick create record is re-enabled after discard on failure", async () => {
 test("quick create record fails in grouped by char", async () => {
     expect.assertions(7);
 
-    Partner._views["form,false"] = '<form><field name="foo"/></form>';
+    Partner._views["form"] = '<form><field name="foo"/></form>';
 
     onRpc("name_create", () => {
         throw makeServerError({ message: "This is a user error" });
@@ -3643,7 +3644,7 @@ test("quick create record fails in grouped by char", async () => {
 test("quick create record fails in grouped by selection", async () => {
     expect.assertions(7);
 
-    Partner._views["form,false"] = '<form><field name="state"/></form>';
+    Partner._views["form"] = '<form><field name="state"/></form>';
 
     onRpc("name_create", () => {
         throw makeServerError({ message: "This is a user error" });
@@ -4334,7 +4335,7 @@ test("Do not open record when clicking on `a` with `href`", async () => {
 test("Open record when clicking on widget field", async function (assert) {
     expect.assertions(2);
 
-    Product._views["form,false"] = `<form string="Product"><field name="display_name"/></form>`;
+    Product._views["form"] = `<form string="Product"><field name="display_name"/></form>`;
 
     await mountView({
         type: "kanban",
@@ -5118,12 +5119,18 @@ test("kanban view with default_group_by", async () => {
     onRpc("web_read_group", ({ kwargs }) => {
         readGroupCount++;
         switch (readGroupCount) {
-            case 1:
-                return expect(kwargs.groupby).toEqual(["bar"]);
-            case 2:
-                return expect(kwargs.groupby).toEqual(["product_id"]);
-            case 3:
-                return expect(kwargs.groupby).toEqual(["bar"]);
+            case 1: {
+                expect(kwargs.groupby).toEqual(["bar"]);
+                break;
+            }
+            case 2: {
+                expect(kwargs.groupby).toEqual(["product_id"]);
+                break;
+            }
+            case 3: {
+                expect(kwargs.groupby).toEqual(["bar"]);
+                break;
+            }
         }
     });
     await mountView({
@@ -5818,7 +5825,7 @@ test("delete an empty column, then a column with records.", async () => {
 
 test.tags("desktop");
 test("edit a column in grouped on m2o", async () => {
-    Product._views["form,false"] = `
+    Product._views["form"] = `
         <form string="Product">
             <field name="name"/>
         </form>`;
@@ -5886,7 +5893,7 @@ test("edit a column in grouped on m2o", async () => {
 test("edit a column propagates right context", async () => {
     expect.assertions(4);
 
-    Product._views["form,false"] = `
+    Product._views["form"] = `
         <form string="Product">
             <field name="display_name"/>
         </form>`;
@@ -7192,7 +7199,7 @@ test("empty grouped kanban with sample data and many2many_tags", async () => {
 
 test.tags("desktop");
 test("sample data does not change after reload with sample data", async () => {
-    Partner._views["kanban,false"] = `
+    Partner._views["kanban"] = `
         <kanban sample="1">
             <templates>
                 <t t-name="card">
@@ -7200,9 +7207,8 @@ test("sample data does not change after reload with sample data", async () => {
                 </t>
             </templates>
         </kanban>`;
-    Partner._views["search,false"] = "<search/>";
     // list-view so that there is a view switcher, unused
-    Partner._views["list,false"] = '<list><field name="foo"/></list>';
+    Partner._views["list"] = '<list><field name="foo"/></list>';
 
     onRpc("web_read_group", function ({ kwargs, parent }) {
         const result = parent();
@@ -7273,13 +7279,11 @@ test("non empty kanban with sample data", async () => {
 test("empty grouped kanban with sample data: add a column", async () => {
     onRpc("web_read_group", function ({ parent }) {
         const result = parent();
-        result.groups = Product._records.map((r) => {
-            return {
-                product_id: [r.id, r.display_name],
-                product_id_count: 0,
-                __domain: [["product_id", "=", r.id]],
-            };
-        });
+        result.groups = this.env["product"].map((r) => ({
+            product_id: [r.id, r.display_name],
+            product_id_count: 0,
+            __domain: [["product_id", "=", r.id]],
+        }));
         result.length = result.groups.length;
         return result;
     });
@@ -7406,13 +7410,11 @@ test("empty grouped kanban with sample data: delete a column", async () => {
 test("empty grouped kanban with sample data: add a column and delete it right away", async () => {
     onRpc("web_read_group", function ({ parent }) {
         const result = parent();
-        result.groups = Product._records.map((r) => {
-            return {
-                product_id: [r.id, r.display_name],
-                product_id_count: 0,
-                __domain: [["product_id", "=", r.id]],
-            };
-        });
+        result.groups = this.env["product"].map((r) => ({
+            product_id: [r.id, r.display_name],
+            product_id_count: 0,
+            __domain: [["product_id", "=", r.id]],
+        }));
         result.length = result.groups.length;
         return result;
     });
@@ -7465,16 +7467,14 @@ test("kanban with sample data: do an on_create action", async () => {
     Partner._records = [];
     Partner._views["form,some_view_ref"] = `<form><field name="foo"/></form>`;
 
-    onRpc("/web/action/load", () => {
-        return {
-            type: "ir.actions.act_window",
-            name: "Archive Action",
-            res_model: "partner",
-            view_mode: "form",
-            target: "new",
-            views: [[false, "form"]],
-        };
-    });
+    onRpc("/web/action/load", () => ({
+        type: "ir.actions.act_window",
+        name: "Archive Action",
+        res_model: "partner",
+        view_mode: "form",
+        target: "new",
+        views: [[false, "form"]],
+    }));
 
     await mountView({
         resModel: "partner",
@@ -7676,13 +7676,13 @@ test("button executes action and reloads", async () => {
 
 test("button executes action and check domain", async () => {
     Partner._fields.active = fields.Boolean({ default: true });
-    for (let i = 0; i < Partner.length; i++) {
+    for (let i = 0; i < Partner._records.length; i++) {
         Partner._records[i].active = true;
     }
 
     mockService("action", {
         doActionButton({ onClose }) {
-            Partner._records[0].active = false;
+            MockServer.env["partner"][0].active = false;
             onClose();
         },
     });
@@ -10413,13 +10413,13 @@ test("open file explorer if no cover image", async () => {
     await setInputFiles([]);
     await animationFrame();
 
-    expect(`.o_file_input input`).not.toBeEnabled({
+    expect(`.o_dialog .o_file_input input`).not.toBeEnabled({
         message: "the upload button should be disabled on upload",
     });
     uploadedPromise.resolve();
     await animationFrame();
 
-    expect(`.o_file_input input`).toBeEnabled({
+    expect(`.o_dialog .o_file_input input`).toBeEnabled({
         message: "the upload button should be enabled for upload",
     });
 });
@@ -11210,7 +11210,7 @@ test("Allow use of 'editable'/'deletable' in ungrouped kanban", async () => {
 test.tags("desktop");
 test("folded groups kept when leaving/coming back", async () => {
     Partner._views = {
-        "kanban,false": `
+        kanban: `
             <kanban>
                 <templates>
                     <t t-name="card">
@@ -11218,8 +11218,6 @@ test("folded groups kept when leaving/coming back", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        "search,false": "<search/>",
-        "form,false": "<form/>",
     };
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -11259,7 +11257,7 @@ test.tags("desktop");
 test("filter groups kept when leaving/coming back", async () => {
     Partner._records[1].state = "abc";
     Partner._views = {
-        "kanban,false": `
+        kanban: `
             <kanban>
                 <progressbar field="state" colors='{"abc": "success", "def": "warning", "ghi": "danger"}' />
                 <templates>
@@ -11268,8 +11266,7 @@ test("filter groups kept when leaving/coming back", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        "search,false": "<search/>",
-        "form,false": `
+        form: `
             <form>
                 <field name="state" widget="radio"/>
             </form>`,
@@ -11319,7 +11316,7 @@ test("folded groups kept when leaving/coming back (grouped by date)", async () =
     Partner._fields.date = fields.Date({ default: "2022-10-10" });
     Partner._records[0].date = "2022-05-10";
     Partner._views = {
-        "kanban,false": `
+        kanban: `
             <kanban>
                 <templates>
                     <t t-name="card">
@@ -11327,8 +11324,6 @@ test("folded groups kept when leaving/coming back (grouped by date)", async () =
                     </t>
                 </templates>
             </kanban>`,
-        "search,false": "<search/>",
-        "form,false": "<form/>",
     };
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -11367,7 +11362,7 @@ test("folded groups kept when leaving/coming back (grouped by date)", async () =
 test.tags("desktop");
 test("loaded records kept when leaving/coming back", async () => {
     Partner._views = {
-        "kanban,false": `
+        kanban: `
             <kanban limit="1">
                 <templates>
                     <t t-name="card">
@@ -11375,8 +11370,6 @@ test("loaded records kept when leaving/coming back", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        "search,false": "<search/>",
-        "form,false": "<form/>",
     };
     await mountWithCleanup(WebClient);
     await getService("action").doAction({
@@ -12343,7 +12336,7 @@ test("drag record to folded column, with progressbars", async () => {
 test.tags("desktop");
 test("quick create record in grouped kanban in a form view dialog", async () => {
     Partner._fields.foo = fields.Char({ default: "ABC" });
-    Partner._views["form,false"] = `<form><field name="bar"/></form>`;
+    Partner._views["form"] = `<form><field name="bar"/></form>`;
 
     onRpc("name_create", ({ method }) => {
         throw makeServerError();
@@ -12561,7 +12554,7 @@ test("drag & drop: content scrolls when reaching the edges", async () => {
     expect(content.scrollLeft).toBe(0);
 
     // Cancel drag: click outside
-    await contains(".o_kanban_renderer").focus();
+    await contains(".o_kanban_renderer").click();
 
     expect(".o_kanban_record.o_dragged").toHaveCount(0);
 });
@@ -12840,26 +12833,26 @@ test("scroll on group unfold and progressbar click", async () => {
     });
 
     expect.verifySteps(["get_views", "read_progress_bar", "web_read_group", "web_search_read"]);
-    queryOne(".o_content").scrollTo = (params) => {
-        expect.step("scrolled");
-        expect(params.top).toBe(0);
-    };
+    queryOne(".o_content").style.maxHeight = "80px";
+    on(".o_content", "scroll", () => expect.step("scrolled"));
 
+    await scroll(".o_content", { top: 50 }); // scroll down to allow auto-scroll to top
     await contains(getKanbanProgressBars(0)[0]).click();
 
     expect.verifySteps([
+        "scrolled",
         "web_read_group",
         "web_search_read",
         "read_progress_bar",
         "web_read_group",
         "web_read_group",
-        "scrolled",
     ]);
     expect(getKanbanColumn(1)).toHaveClass("o_column_folded");
 
+    await scroll(".o_content", { top: 50 }); // scroll down to allow auto-scroll to top
     await contains(getKanbanColumn(1)).click();
 
-    expect.verifySteps(["web_search_read", "scrolled"]);
+    expect.verifySteps(["scrolled", "web_search_read"]);
 });
 
 test.tags("desktop");
@@ -12958,6 +12951,8 @@ test("action button in controlPanel with display='always'", async () => {
 
 test.tags("desktop");
 test("Keep scrollTop when loading records with load more", async () => {
+    Partner._records[0].bar = false;
+    Partner._records[1].bar = false;
     await mountView({
         type: "kanban",
         resModel: "partner",
@@ -12972,14 +12967,13 @@ test("Keep scrollTop when loading records with load more", async () => {
         groupBy: ["bar"],
         limit: 1,
     });
-    queryOne(".o_kanban_renderer").style.overflow = "scroll";
-    queryOne(".o_kanban_renderer").style.height = "500px";
     const clickKanbanLoadMoreButton = queryFirst(".o_kanban_load_more button");
     clickKanbanLoadMoreButton.scrollIntoView();
-    const previousScrollTop = queryOne(".o_kanban_renderer").scrollTop;
-    await contains(clickKanbanLoadMoreButton).click();
+    const previousScrollTop = queryOne(".o_content").scrollTop;
+    clickKanbanLoadMoreButton.click();
+    await animationFrame();
     expect(previousScrollTop).not.toBe(0, { message: "Should not have the scrollTop value at 0" });
-    expect(queryOne(".o_kanban_renderer").scrollTop).toBe(previousScrollTop);
+    expect(queryOne(".o_content").scrollTop).toBe(previousScrollTop);
 });
 
 test("Kanban: no reset of the groupby when a non-empty column is deleted", async () => {
@@ -13268,9 +13262,8 @@ test("kanbans with basic and custom compiler, same arch", async () => {
 
     Partner._fields.one2many = fields.One2many({ relation: "partner" });
     Partner._records[0].one2many = [1];
-    Partner._views["form,false"] = `<form><field name="one2many" mode="kanban"/></form>`;
-    Partner._views["search,false"] = `<search/>`;
-    Partner._views["kanban,false"] = `
+    Partner._views["form"] = `<form><field name="one2many" mode="kanban"/></form>`;
+    Partner._views["kanban"] = `
         <kanban js_class="my_kanban">
             <templates>
                 <t t-name="card">
@@ -13508,4 +13501,91 @@ test("group by numeric field (with aggregator)", async () => {
         groupBy: ["int_field"],
     });
     expect.verifySteps(["web_read_group"]);
+});
+
+test.tags("desktop");
+test("drag and drop records and quickly open a record", async () => {
+    Partner._views["kanban,false"] = `
+        <kanban>
+            <templates>
+                <t t-name="card">
+                    <div><field name="foo"/></div>
+                </t>
+            </templates>
+        </kanban>`;
+    Partner._views["search,false"] = "<search/>";
+    Partner._views["form,false"] = `
+        <form>
+            <field name="foo"/>
+        </form>`;
+
+    const defs = [new Deferred(), new Deferred()];
+    let saveCount = 0;
+    onRpc("web_save", () => {
+        expect.step("web_save");
+        return defs[saveCount++];
+    });
+
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction({
+        res_model: "partner",
+        type: "ir.actions.act_window",
+        views: [
+            [false, "kanban"],
+            [false, "form"],
+        ],
+        context: {
+            group_by: ["product_id"],
+        },
+    });
+
+    expect(".o_kanban_group:first-child .o_kanban_record").toHaveCount(2);
+    expect(".o_kanban_group:nth-child(2) .o_kanban_record").toHaveCount(2);
+
+    await contains(".o_kanban_group:first-child .o_kanban_record").dragAndDrop(
+        ".o_kanban_group:nth-child(2)"
+    );
+    await contains(".o_kanban_group:first-child .o_kanban_record").dragAndDrop(
+        ".o_kanban_group:nth-child(2)"
+    );
+    await contains(".o_kanban_record:eq(0)").click();
+    expect(".o_kanban_view").toHaveCount(1);
+    expect(".o_kanban_group:first-child .o_kanban_record").toHaveCount(0);
+    expect(".o_kanban_group:nth-child(2) .o_kanban_record").toHaveCount(4);
+    expect.verifySteps(["web_save"]);
+
+    defs[0].resolve();
+    await animationFrame();
+    // because of the mutex in the model, the second web_save is done only once the first one
+    // returned, but that rpc can't be done if the component has already been destroyed.
+    expect(".o_kanban_view").toHaveCount(1);
+    expect(".o_kanban_group:first-child .o_kanban_record").toHaveCount(0);
+    expect(".o_kanban_group:nth-child(2) .o_kanban_record").toHaveCount(4);
+    expect.verifySteps(["web_save"]);
+
+    defs[1].resolve();
+    await animationFrame();
+    expect(".o_form_view").toHaveCount(1);
+});
+
+test("hide pager in the kanban view with sample data", async () => {
+    Partner._records = [];
+
+    await mountView({
+        arch: `
+            <kanban sample="1">
+                <templates>
+                    <div t-name="card">
+                        <field name="foo"/>
+                        <field name="int_field"/>
+                    </div>
+                </templates>
+            </kanban>`,
+        resModel: "partner",
+        type: "kanban",
+        noContentHelp: "No content helper",
+    });
+
+    expect(".o_content").toHaveClass("o_view_sample_data");
+    expect(".o_cp_pager").not.toHaveCount();
 });

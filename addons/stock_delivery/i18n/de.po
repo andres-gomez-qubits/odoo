@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Wil Odoo, 2025
+# Felix Schubert <felix.schubert@go-erp.com>, 2025
 # Larissa Manderfeld, 2025
 # 
 msgid ""
@@ -100,7 +101,7 @@ msgstr "Auf Versandmethoden anwendbar"
 #. module: stock_delivery
 #: model_terms:ir.ui.view,arch_db:stock_delivery.view_picking_withcarrier_out_form
 msgid "Cancel"
-msgstr "Stornieren"
+msgstr "Abbrechen"
 
 #. module: stock_delivery
 #: model_terms:ir.ui.view,arch_db:stock_delivery.view_picking_withcarrier_out_form
@@ -143,7 +144,7 @@ msgstr "Kosten: %(price).2f %(currency)s"
 #. module: stock_delivery
 #: model:ir.model.fields,field_description:stock_delivery.field_choose_delivery_package__create_uid
 msgid "Created by"
-msgstr "Angelegt von"
+msgstr "Erstellt von"
 
 #. module: stock_delivery
 #: model:ir.model.fields,field_description:stock_delivery.field_choose_delivery_package__create_date

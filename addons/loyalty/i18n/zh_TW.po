@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:03+0000\n"
+"POT-Creation-Date: 2025-07-18 18:39+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Tony Ng, 2025\n"
 "Language-Team: Chinese (Taiwan) (https://app.transifex.com/odoo/teams/41243/zh_TW/)\n"
@@ -1072,12 +1072,6 @@ msgid "Generate eWallet"
 msgstr "生成電子錢包"
 
 #. module: loyalty
-#. odoo-javascript
-#: code:addons/loyalty/static/src/xml/loyalty_templates.xml:0
-msgid "Generate {{props.context.program_item_name}}"
-msgstr "產生 {{props.context.program_item_name}}"
-
-#. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_program.py:0
 msgid "Get 10% off on some products, with a code"
@@ -1546,6 +1540,7 @@ msgid "Portal Visible"
 msgstr "門戶可見"
 
 #. module: loyalty
+#: model:ir.model,name:loyalty.model_product_pricelist
 #: model:ir.model.fields,field_description:loyalty.field_loyalty_program__pricelist_ids
 msgid "Pricelist"
 msgstr "價格表"
@@ -1885,6 +1880,14 @@ msgstr "這是此獎勵可以套用折扣的最大金額，保留為 0 表示無
 
 #. module: loyalty
 #. odoo-python
+#: code:addons/loyalty/models/product_pricelist.py:0
+msgid ""
+"This pricelist may not be archived. It is being used for active promotion "
+"programs: %s"
+msgstr ""
+
+#. module: loyalty
+#. odoo-python
 #: code:addons/loyalty/models/product_product.py:0
 msgid ""
 "This product may not be archived. It is being used for an active promotion "
@@ -1912,9 +1915,10 @@ msgid "Trigger"
 msgstr "觸發器"
 
 #. module: loyalty
-#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_reward_view_form
-msgid "Untaxed discount"
-msgstr "稅前折扣"
+#. odoo-python
+#: code:addons/loyalty/models/loyalty_reward.py:0
+msgid "Unsupported search operator"
+msgstr ""
 
 #. module: loyalty
 #. odoo-python
@@ -2204,13 +2208,12 @@ msgid "usages"
 msgstr "使用"
 
 #. module: loyalty
+#: model_terms:ir.ui.view,arch_db:loyalty.loyalty_program_view_form
+msgid "used)"
+msgstr ""
+
+#. module: loyalty
 #. odoo-python
 #: code:addons/loyalty/models/loyalty_reward.py:0
 msgid "your order"
 msgstr "您的訂單"
-
-#. module: loyalty
-#. odoo-javascript
-#: code:addons/loyalty/static/src/xml/loyalty_templates.xml:0
-msgid "{{loyalty_el_title}}"
-msgstr "{{loyalty_el_title}}"

@@ -39,6 +39,7 @@ import {
     defineModels,
     defineParams,
     fields,
+    MockServer,
     models,
     mountWithCleanup,
     onRpc,
@@ -1077,7 +1078,9 @@ test("support properties", async () => {
         await openModelFieldSelectorPopover();
         expectedDomain = domain;
         await contains(`.o_model_field_selector_popover_item[data-name='${name}'] button`).click();
-        const { string } = Product._records[0].definitions.find((def) => def.name === name);
+        const { string } = MockServer.env["product"][0].definitions.find(
+            (def) => def.name === name
+        );
         expect(getCurrentPath()).toBe(`Properties > ${string}`);
         expect(getOperatorOptions()).toEqual(options);
     }
@@ -2450,4 +2453,59 @@ test("Hierarchical operators", async () => {
         ],
         { message: "no hierarchical operator if allow_hierachy_operators is set to false" }
     );
+});
+
+test("preserve virtual operators in sub domains", async () => {
+    Team._fields.active = fields.Boolean();
+    await makeDomainSelector({
+        domain: `[("product_id", "any", [("team_id", "any", ["&", ("active", "=", False), ("name", "=", False)])])]`,
+        update(domain) {
+            expect.step(domain);
+        },
+    });
+    expect(getCurrentOperator()).toBe("matches");
+    expect(getCurrentOperator(1)).toBe("matches");
+    expect(getCurrentOperator(2)).toBe("is");
+    expect(getCurrentOperator(3)).toBe("is not set");
+
+    await contains(".o_tree_editor:eq(1) a:contains('New Rule'):eq(1)").click();
+    expect(getCurrentOperator()).toBe("matches");
+    expect(getCurrentOperator(1)).toBe("matches");
+    expect(getCurrentOperator(2)).toBe("is");
+    expect(getCurrentOperator(3)).toBe("is not set");
+    expect(getCurrentOperator(4)).toBe("=");
+    expect.verifySteps([
+        `[("product_id", "any", ["&", ("team_id", "any", ["&", ("active", "=", False), ("name", "=", False)]), ("id", "=", 1)])]`,
+    ]);
+
+    await clickOnButtonDeleteNode(4);
+    expect(getCurrentOperator()).toBe("matches");
+    expect(getCurrentOperator(1)).toBe("matches");
+    expect(getCurrentOperator(2)).toBe("is");
+    expect(getCurrentOperator(3)).toBe("is not set");
+    expect.verifySteps([
+        `[("product_id", "any", [("team_id", "any", ["&", ("active", "=", False), ("name", "=", False)])])]`,
+    ]);
+});
+
+test("hide within operators when allowExpressions = False", async () => {
+    Team._fields.active = fields.Boolean();
+    await makeDomainSelector({
+        domain: `[("datetime", "=", False)]`,
+        allowExpressions: false,
+        update(domain) {
+            expect.step(domain);
+        },
+    });
+    expect(getOperatorOptions()).toEqual([
+        "=",
+        "!=",
+        ">",
+        ">=",
+        "<",
+        "<=",
+        "is between",
+        "is set",
+        "is not set",
+    ]);
 });

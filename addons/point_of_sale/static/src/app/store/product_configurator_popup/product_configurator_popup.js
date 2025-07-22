@@ -143,10 +143,7 @@ export class ProductConfiguratorPopup extends Component {
                 // for custom values, it will never be a multiple attribute
                 attribute_custom_values[valueIds[0]] = custom_value;
             }
-            const attr = this.pos.data.models["product.template.attribute.value"].get(valueIds[0]);
-            if (attr && attr.attribute_id.create_variant !== "always") {
-                price_extra += extra;
-            }
+            price_extra += extra;
         });
 
         attribute_value_ids = attribute_value_ids.flat();
@@ -159,11 +156,11 @@ export class ProductConfiguratorPopup extends Component {
     computeProductProduct() {
         let product = this.props.product;
         const formattedPayload = this.computePayload();
-        const alwaysVariants = this.props.product.attribute_line_ids.every(
-            (line) => line.attribute_id.create_variant === "always"
+        const hasVariants = this.props.product.attribute_line_ids.some(
+            (line) => line.attribute_id.create_variant !== "no_variant"
         );
 
-        if (alwaysVariants) {
+        if (hasVariants) {
             const newProduct = this.pos.models["product.product"]
                 .filter((p) => p.raw?.product_template_variant_value_ids?.length > 0)
                 .find((p) =>

@@ -90,6 +90,9 @@ class FormatAddressMixin(models.AbstractModel):
                         self.env['ir.ui.view'].postprocess_and_fields(sub_arch, model=self._name)
                     except ValueError:
                         return arch
+                new_address_node = sub_arch.find('.//div[@class="o_address_format"]')
+                if new_address_node is not None:
+                    sub_arch = new_address_node
                 address_node.getparent().replace(address_node, sub_arch)
         elif address_format and not self._context.get('no_address_format'):
             # For the zip, city and state fields we need to move them around in order to follow the country address format.
@@ -639,6 +642,13 @@ class Partner(models.Model):
         extended by inheriting classes. """
         return ['vat', 'company_registry', 'industry_id']
 
+    @api.model
+    def _company_dependent_commercial_fields(self):
+        return [
+            fname for fname in self._commercial_fields()
+            if self._fields[fname].company_dependent
+        ]
+
     def _commercial_sync_from_company(self):
         """ Handle sync of commercial fields when a new parent commercial entity is set,
         as if they were related fields """
@@ -646,7 +656,20 @@ class Partner(models.Model):
         if commercial_partner != self:
             sync_vals = commercial_partner._update_fields_values(self._commercial_fields())
             self.write(sync_vals)
+            self._company_dependent_commercial_sync()
             self._commercial_sync_to_children()
+
+    def _company_dependent_commercial_sync(self):
+        if not (fields_to_sync := self._company_dependent_commercial_fields()):
+            return
+
+        for company_sudo in self.env['res.company'].sudo().search([]):
+            if company_sudo == self.env.company:
+                continue  # already handled by _commercial_sync_from_company
+            self_in_company = self.with_company(company_sudo)
+            self_in_company.write(
+                self_in_company.commercial_partner_id._update_fields_values(fields_to_sync)
+            )
 
     def _commercial_sync_to_children(self, fields_to_sync=None):
         """ Handle sync of commercial fields to descendants """

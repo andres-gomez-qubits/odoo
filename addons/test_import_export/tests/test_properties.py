@@ -224,6 +224,49 @@ class TestPropertiesExportImport(HttpCase):
             ],
         )
 
+    def test_export_complex_path_properties(self):
+        path_records = self.env['import.path.properties'].create([
+            {
+                'properties_id': self.properties_records[0].id,
+                'another_properties_id': self.properties_records[1].id,  # Same definition
+            },
+            {
+                'properties_id': self.properties_records[3].id,
+                'another_properties_id': self.properties_records[2].id,
+            }
+        ])
+        export_fields = [
+            "properties_id/properties.m2m_prop/name",  # '' for [0], <All partner name> for [1]
+            "another_properties_id/properties.m2o_prop/name",  # Partner Name 1 for [0], '' for [1]
+            "another_properties_id/properties.bool_prop",  # '' for [0], True for [1]
+            "all_properties_ids/properties.char_prop",  # 'Not the default'/'Def' for [0], '' for [1]
+        ]
+
+        self.assertEqual(
+            path_records.with_context(import_compat=False).export_data(export_fields)['datas'],
+            [
+                ['', 'Name Partner 1', '', 'Not the default'],
+                ['', '', '', 'Def'],
+                ['Name Partner 1', '', True, ''],
+                ['Name Partner 2', '', '', ''],
+                ['Name Partner 3', '', '', ''],
+                ['', '', '', ''],  # For the path_records[1] and all_properties_ids
+            ]
+        )
+
+        export_fields = [
+            "properties_id/properties.m2m_prop",  # '' for [0], <All partner name> for [1]
+            "another_properties_id/properties.m2o_prop",  # Partner Name 1 for [0], '' for [1]
+            "another_properties_id/properties.bool_prop",  # '' for [0], True for [1]
+        ]
+        self.assertEqual(
+            path_records.export_data(export_fields)['datas'],
+            [
+                ['', 'Name Partner 1', ''],
+                ['Name Partner 1,Name Partner 2,Name Partner 3', '', True],
+            ]
+        )
+
     def test_import_properties(self):
         def_record_1 = self.definition_records[0]
         def_record_2 = self.definition_records[1]
@@ -243,6 +286,12 @@ class TestPropertiesExportImport(HttpCase):
             ], [
                 str(def_record_1.id),
                 'One Text', 'selection_3', self.partners[1].display_name,
+                '', '', '',
+            ],
+            # Record with NULL selection value
+            [
+                str(def_record_1.id),
+                'One Text', '', self.partners[1].display_name,
                 '', '', '',
             ],
 
@@ -295,6 +344,7 @@ class TestPropertiesExportImport(HttpCase):
         self.assertEqual(records_created.mapped('properties'), [
             {'char_prop': 'One Text', 'selection_prop': 'selection_2', 'm2o_prop': self.partners[0].id},
             {'char_prop': 'One Text', 'selection_prop': 'selection_3', 'm2o_prop': self.partners[1].id},
+            {'char_prop': 'One Text', 'selection_prop': False, 'm2o_prop': self.partners[1].id},
             {'bool_prop': True, 'tags_prop': ['aa'], 'm2m_prop': self.partners[:2].ids},
             {'bool_prop': False, 'tags_prop': ['bb'], 'm2m_prop': False},
         ])
@@ -307,31 +357,36 @@ class TestPropertiesExportImport(HttpCase):
             [
                 "Id", "Record Definition Id",
                 # Field of the first definition
-                f"TextType ({def_record_1.display_name})", f"many2one ({def_record_1.display_name})",
+                f"TextType ({def_record_1.display_name})", f"many2one ({def_record_1.display_name})", f"One Selection ({def_record_1.display_name})",
                 # Field of the second definition
                 f"CheckBox ({def_record_2.display_name})", "properties.tags_prop", f"M2M ({def_record_2.display_name})",
             ],
             # Record attached to the first definition record
             [
                 external_ids[0], str(def_record_1.id),
-                'SSBIYXRlIHRoaXMgZmVhdHVyZQ==', str(self.partners[2].id),
+                'SSBIYXRlIHRoaXMgZmVhdHVyZQ==', str(self.partners[2].id), 'selection_2',
                 '', '', '',
             ],
-
+            # Record with NULL selection value
+            [
+                external_ids[2], str(def_record_1.id),
+                'One Text', str(self.partners[1].id), 'selection_1',
+                '', '', '',
+            ],
             # Record attached to the second definition record
             [
                 external_ids[1], str(def_record_2.id),  # record that changed its parent
-                '', '',
+                '', '', '',
                 'FaLse', 'AA', f'{self.partners[1].id}',
             ],
             [
-                external_ids[2], str(def_record_2.id),
-                '', '',
+                external_ids[4], str(def_record_2.id),
+                '', '', '',
                 'false', 'bb,CC', '',
             ],
             [
                 external_ids[3], str(def_record_2.id),
-                '', '',
+                '', '', '',
                 '1', 'BB', f'{self.partners[1].id},{self.partners[2].id}',
             ],
         ]
@@ -351,9 +406,10 @@ class TestPropertiesExportImport(HttpCase):
                 1: ['record_definition_id'],
                 2: ['properties.char_prop'],
                 3: ['properties.m2o_prop'],
-                4: ['properties.bool_prop'],
-                5: ['properties.tags_prop'],
-                6: ['properties.m2m_prop'],
+                4: ['properties.selection_prop'],
+                5: ['properties.bool_prop'],
+                6: ['properties.tags_prop'],
+                7: ['properties.m2m_prop'],
             },
         )
 
@@ -363,6 +419,7 @@ class TestPropertiesExportImport(HttpCase):
                 'record_definition_id',
                 'properties.char_prop',
                 'properties.m2o_prop/.id',
+                'properties.selection_prop',
                 'properties.bool_prop',
                 'properties.tags_prop',
                 'properties.m2m_prop/.id',
@@ -375,6 +432,7 @@ class TestPropertiesExportImport(HttpCase):
         self.assertEqual(records_created.mapped('properties'), [
             {'char_prop': 'SSBIYXRlIHRoaXMgZmVhdHVyZQ==', 'selection_prop': 'selection_2', 'm2o_prop': self.partners[2].id},
             {'bool_prop': False, 'tags_prop': ['aa'], 'm2m_prop': self.partners[1].ids},
-            {'bool_prop': False, 'tags_prop': ['bb', 'cc'], 'm2m_prop': False},
+            {'char_prop': 'One Text', 'selection_prop': 'selection_1', 'm2o_prop': self.partners[1].id},
             {'bool_prop': True, 'tags_prop': ['bb'], 'm2m_prop': self.partners[1:].ids},
+            {'bool_prop': False, 'tags_prop': ['bb', 'cc'], 'm2m_prop': False},
         ])

@@ -52,7 +52,7 @@ class PosPaymentMethod(models.Model):
     active = fields.Boolean(default=True)
     type = fields.Selection(selection=[('cash', 'Cash'), ('bank', 'Bank'), ('pay_later', 'Customer Account')], compute="_compute_type")
     image = fields.Image("Image", max_width=50, max_height=50)
-    payment_method_type = fields.Selection(selection=_get_payment_method_type, string="Integration", default='none', required=True)
+    payment_method_type = fields.Selection(selection=lambda self: self._get_payment_method_type(), string="Integration", default='none', required=True)
     default_qr = fields.Char(compute='_compute_qr')
     qr_code_method = fields.Selection(
         string='QR Code Format', copy=False,
@@ -113,6 +113,9 @@ class PosPaymentMethod(models.Model):
         for pm in self:
             if pm.journal_id and pm.journal_id.type not in ['cash', 'bank']:
                 raise UserError(_("Only journals of type 'Cash' or 'Bank' could be used with payment methods."))
+            if pm.journal_id and pm.journal_id.type == 'bank':
+                chart_template = self.with_context(allowed_company_ids=self.env.company.root_id.ids).env['account.chart.template']
+                pm.outstanding_account_id = chart_template.ref('account_journal_payment_debit_account_id', raise_if_not_found=False) or self.company_id.transfer_account_id
         if self.is_cash_count:
             self.use_payment_terminal = False
 

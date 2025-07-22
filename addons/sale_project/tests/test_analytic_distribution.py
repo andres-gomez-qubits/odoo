@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from .common import TestSaleProjectCommon
+from odoo import Command
 from odoo.tests import HttpCase
 from odoo.tests.common import tagged
 
@@ -75,4 +76,64 @@ class TestAnalyticDistribution(HttpCase, TestSaleProjectCommon):
             sale_order_line.analytic_distribution,
             {str(self.project_global.account_id.id): 100},
             "The analytic distribution of the SOL should be set to the account of the project set on the product.",
+        )
+
+    def test_project_analytic_distribution_on_invoice_lines(self):
+        """
+        Test that Analytic Distribution applies from Project to Invoice Lines (excluding payable/receivable lines).
+        Steps:
+          1. Create a project.
+          2. Create an invoice with the project in context.
+          3. Add an invoice line.
+          4. Verify analytic distribution is applied.
+        """
+
+        invoice = self.env['account.move'].with_context({
+            'default_move_type': 'out_invoice',
+            'default_partner_id': self.project_global.partner_id.id,
+            'project_id': self.project_global.id
+        }).create({
+            'invoice_line_ids': [Command.create({
+                'product_id': self.product_delivery_manual1.id,
+                'quantity': 1,
+                'price_unit': 10,
+            })]
+        })
+
+        filtered_lines = invoice.line_ids.filtered(lambda l: l.analytic_distribution)
+        self.assertEqual(
+            len(filtered_lines),
+            1,
+            "Analytic distribution is not set on the payable/receivable lines"
+        )
+
+    def test_get_so_mapping_domain_with_no_analytic_distribution(self):
+        """
+        Ensure _get_so_mapping_domain doesnt fail when analytic_distribution is not set
+        """
+
+        account = self.env['account.account'].create({
+            'name': 'Receivable test account',
+            'code': '00001',
+            'account_type': 'asset_receivable',
+        })
+
+        move = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+        })
+
+        line = self.env['account.move.line'].create({
+            'move_id': move.id,
+            'name': 'Line without analytic',
+            'quantity': 1,
+            'price_unit': 100,
+            'account_id': account.id,
+        })
+        domain = line._get_so_mapping_domain()
+
+        self.assertEqual(
+            domain,
+            [(0, '=', 1)],
+            "Domain should be (0, '=', 1) when analytic_distribution is missing."
         )

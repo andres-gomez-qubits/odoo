@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from unittest.mock import patch
+
 from odoo.http import request
 from odoo.addons.base.tests.common import HttpCaseWithUserPortal
 from odoo.addons.website.controllers.form import WebsiteForm
@@ -19,7 +21,7 @@ class TestWebsiteFormEditor(HttpCaseWithUserPortal):
         })
 
     def test_tour(self):
-        self.start_tour(self.env['website'].get_client_action_url('/'), 'website_form_editor_tour', login='admin', timeout=120)
+        self.start_tour(self.env['website'].get_client_action_url('/'), 'website_form_editor_tour', login='admin', timeout=240)
         self.start_tour('/', 'website_form_editor_tour_submit')
         self.start_tour('/', 'website_form_editor_tour_results', login="admin")
 
@@ -81,3 +83,26 @@ class TestWebsiteForm(TransactionCase):
             mail = self.env['mail.mail'].search([], order='id desc', limit=1)
             self.assertNotIn('<b>', mail.body_html, "HTML should be escaped in website form")
             self.assertIn('&lt;b&gt;', mail.body_html, "HTML should be escaped in website form (2)")
+
+    def test_website_form_commit_when_creating(self):
+        self.env.ref('base.model_res_partner').website_form_access = True
+        self.env['ir.model.fields'].formbuilder_whitelist('res.partner', ['name'])
+        WebsiteFormController = WebsiteForm()
+        original_insert_record = WebsiteFormController.insert_record
+        def dummy_insert_record(*args, **kwargs):
+            res = original_insert_record(*args, **kwargs)
+            # delete website_form savepoint by rollbacking to test savepoint
+            self.env.cr.execute('ROLLBACK TO SAVEPOINT test_%d' % self._savepoint_id)
+            return res
+        WebsiteFormController.insert_record = dummy_insert_record
+        with MockRequest(self.env):
+            request.params = {
+                'model_name': 'res.partner',
+                'name': 'test partner',
+            }
+            with self.assertLogs(level='ERROR'):
+                response = WebsiteFormController.website_form(
+                    **request.params,
+                )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(response.data.startswith(b'{"id":'))

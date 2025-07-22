@@ -289,13 +289,19 @@ class ProductProduct(models.Model):
 
     @api.depends_context('partner_id')
     def _compute_product_code(self):
+        read_access = self.env['ir.model.access'].check('product.supplierinfo', 'read', False)
         for product in self:
             product.code = product.default_code
-            if self.env['ir.model.access'].check('product.supplierinfo', 'read', False):
+            if read_access:
                 for supplier_info in product.seller_ids:
                     if supplier_info.partner_id.id == product._context.get('partner_id'):
+                        if supplier_info.product_id and supplier_info.product_id != product:
+                            # Supplier info specific for another variant.
+                            continue
                         product.code = supplier_info.product_code or product.default_code
-                        break
+                        if product == supplier_info.product_id:
+                            # Supplier info specific for this variant.
+                            break
 
     @api.depends_context('partner_id')
     def _compute_partner_ref(self):
@@ -585,7 +591,8 @@ class ProductProduct(models.Model):
                 products = self.search_fetch(expression.AND([domain, [('default_code', operator, name)]]), ['display_name'], limit=limit)
                 limit_rest = limit and limit - len(products)
                 if limit_rest is None or limit_rest > 0:
-                    products |= self.search_fetch(expression.AND([domain, [('id', 'not in', products.ids)], [('name', operator, name)]]), ['display_name'], limit=limit_rest)
+                    products_query = self._search(expression.AND([domain, [('default_code', operator, name)]]), limit=limit)
+                    products |= self.search_fetch(expression.AND([domain, [('id', 'not in', products_query)], [('name', operator, name)]]), ['display_name'], limit=limit_rest)
             else:
                 domain_neg = [
                     ('name', operator, name),
@@ -706,7 +713,13 @@ class ProductProduct(models.Model):
 
         def sort_function(record):
             vals = {
-                'price_discounted': record.currency_id._convert(record.price_discounted, record.env.company.currency_id, record.env.company, date or fields.Date.context_today(self))
+                'price_discounted': record.currency_id._convert(
+                    record.price_discounted,
+                    record.env.company.currency_id,
+                    record.env.company,
+                    date or fields.Date.context_today(self),
+                    round=False,
+                ),
             }
             return [vals.get(key, record[key]) for key in sort_key]
         sellers = self._get_filtered_sellers(partner_id=partner_id, quantity=quantity, date=date, uom_id=uom_id, params=params)

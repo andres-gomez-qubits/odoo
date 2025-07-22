@@ -1,5 +1,6 @@
 /** @odoo-module */
 
+import { delay } from '@odoo/hoot-dom';
 import {
     clickOnEditAndWaitEditMode,
     clickOnExtraMenuItem,
@@ -9,7 +10,6 @@ import {
 } from '@website/js/tours/tour_utils';
 
 registerWebsitePreviewTour('edit_menus', {
-    checkDelay: 100,
     url: '/',
 }, () => [
     // Add a megamenu item from the menu.
@@ -249,10 +249,9 @@ registerWebsitePreviewTour('edit_menus', {
         content: "Drag Mega at the top",
         trigger: '.oe_menu_editor li:contains("Megaaaaa!") .fa-bars',
         run(helpers) {
-            return helpers.drag_and_drop('.oe_menu_editor li:contains("Home")', {
-                position: {
-                    y: 27,
-                    left: 5,
+            return helpers.drag_and_drop(".oe_menu_editor li:contains('Home') .fa-bars", {
+                position : {
+                    top: 20,
                 },
                 relative: true,
             });
@@ -341,9 +340,17 @@ registerWebsitePreviewTour('edit_menus', {
     },
     ...clickOnEditAndWaitEditMode(),
     {
+        trigger: ":iframe main section.s_media_list .s_media_list_item:eq(2) h3:contains(post)",
+    },
+    {
         content: "Open nested menu item",
-        trigger: ':iframe .top_menu .nav-item:contains("Home"):nth-child(2) .dropdown-toggle',
-        run: "click",
+        trigger: ':iframe .o_header_is_scrolled.o_top_fixed_element .nav-item:contains("Home"):nth-child(2) .dropdown-toggle',
+        async run(actions) {
+            // If you scroll after click on dropdown, nested menu disappears.
+            await delay(500);
+            // So wait that scroll is finished before click.
+            await actions.click();
+        },
     },
     {
         // If this step fails, it means that a patch inside bootstrap was lost.

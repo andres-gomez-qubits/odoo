@@ -611,6 +611,13 @@ class HrExpense(models.Model):
                 raise UserError(_('You cannot delete a posted or approved expense.'))
 
     def write(self, vals):
+        if (
+                'state' in vals
+                and vals['state'] != 'submitted'
+                and not (self.env.user.has_group('hr_expense.group_hr_expense_manager') or self.env.su)
+                and any(state == 'draft' for state in self.mapped('state'))
+        ):
+            raise UserError(_("You don't have the rights to bypass the validation process of this expense."))
         expense_to_previous_sheet = {}
         if 'sheet_id' in vals:
             # Check access rights on the sheet
@@ -696,7 +703,7 @@ class HrExpense(models.Model):
     @api.model
     def _get_empty_list_mail_alias(self):
         use_mailgateway = self.env['ir.config_parameter'].sudo().get_param('hr_expense.use_mailgateway')
-        expense_alias = self.env.ref('hr_expense.mail_alias_expense') if use_mailgateway else False
+        expense_alias = self.env.ref('hr_expense.mail_alias_expense', raise_if_not_found=False) if use_mailgateway else False
         if expense_alias and expense_alias.alias_domain and expense_alias.alias_name:
             # encode, but force %20 encoding for space instead of a + (URL / mailto difference)
             params = werkzeug.urls.url_encode({'subject': _("Lunch with customer $12.32")}).replace('+', '%20')
@@ -921,6 +928,7 @@ class HrExpense(models.Model):
                 'balance': to_update['balance'],
                 'currency_id': base_line['currency_id'].id,
                 'partner_id': self.vendor_id.id,
+                'quantity': self.quantity,
             }
             move_lines.append(base_move_line)
 

@@ -304,6 +304,19 @@ patch(PosOrder.prototype, {
             ) {
                 continue;
             }
+            if (
+                claimedReward.reward.program_id.program_type === "coupons" &&
+                this.lines.find(
+                    (rewardline) => rewardline.reward_id?.id === claimedReward.reward.id
+                )
+            ) {
+                continue;
+            }
+
+            //If there is only one possible reward we try to claim the most possible out of it
+            if (claimedReward.reward.reward_product_ids?.length === 1) {
+                delete claimedReward.args["quantity"];
+            }
             this._applyReward(claimedReward.reward, claimedReward.coupon_id, claimedReward.args);
         }
     },
@@ -435,7 +448,7 @@ patch(PosOrder.prototype, {
             return false;
         });
         for (const line of this.get_orderlines()) {
-            if (line.is_reward_line && line.coupon_id.id === coupon_id) {
+            if (line.is_reward_line && line.coupon_id?.id === coupon_id) {
                 points -= line.points_cost;
             }
         }
@@ -480,6 +493,10 @@ patch(PosOrder.prototype, {
         }
         return true;
     },
+    isLineValidForLoyaltyPoints(line) {
+        // This method should be overriden in other modules
+        return true;
+    },
     /**
      * Computes how much points each program gives.
      *
@@ -496,6 +513,9 @@ patch(PosOrder.prototype, {
             const rewardProgram = reward && reward.program_id;
             // Skip lines for automatic discounts.
             if (isDiscount && rewardProgram.trigger === "auto") {
+                continue;
+            }
+            if (!this.isLineValidForLoyaltyPoints(line)) {
                 continue;
             }
             for (const program of programs) {
@@ -751,6 +771,13 @@ patch(PosOrder.prototype, {
                 if (points < reward.required_points) {
                     continue;
                 }
+                // Skip if the reward program is of type 'coupons' and there is already an reward orderline linked to the current reward to avoid multiple reward apply
+                if (
+                    reward.program_id.program_type === "coupons" &&
+                    this.lines.find((rewardline) => rewardline.reward_id?.id === reward.id)
+                ) {
+                    continue;
+                }
                 if (auto && this.uiState.disabledRewards.has(reward.id)) {
                     continue;
                 }
@@ -907,7 +934,10 @@ patch(PosOrder.prototype, {
             if (!line.get_quantity()) {
                 continue;
             }
-            const taxKey = line.tax_ids.map((t) => t.id);
+
+            const taxKey = ["ewallet", "gift_card"].includes(reward.program_id.program_type)
+                ? line.tax_ids.map((t) => t.id)
+                : line.tax_ids.filter((t) => t.amount_type !== "fixed").map((t) => t.id);
             discountable += line.get_price_with_tax();
             if (!discountablePerTax[taxKey]) {
                 discountablePerTax[taxKey] = 0;
@@ -1153,7 +1183,7 @@ patch(PosOrder.prototype, {
 
             lst.push({
                 product_id: discountProduct,
-                price_unit: -(entry[1] * discountFactor),
+                price_unit: -(Math.min(this.get_total_with_tax(), entry[1]) * discountFactor),
                 qty: 1,
                 reward_id: reward,
                 is_reward_line: true,

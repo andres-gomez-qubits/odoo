@@ -4,16 +4,16 @@
 # 
 # Translators:
 # Wil Odoo, 2024
-# Erwin van der Ploeg <erwin@odooexperts.nl>, 2025
 # Manon Rondou, 2025
+# Erwin van der Ploeg <erwin@odooexperts.nl>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:24+0000\n"
+"POT-Creation-Date: 2025-06-06 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Manon Rondou, 2025\n"
+"Last-Translator: Erwin van der Ploeg <erwin@odooexperts.nl>, 2025\n"
 "Language-Team: Dutch (https://app.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -35,6 +35,12 @@ msgid ""
 msgstr ""
 "%s is niet meer beschikbaar en is daarom uit je order verwijderd. Controleer"
 " je order en valideer deze opnieuw."
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/models/pos_config.py:0
+msgid "(require Odoo Enterprise)"
+msgstr "(vereist Odoo Enterprise)"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -140,7 +146,7 @@ msgstr "Beschikbaarheid na"
 #. module: pos_self_order
 #: model:ir.model.fields,field_description:pos_self_order.field_pos_category__hour_until
 msgid "Availability Until"
-msgstr "Beschikbaarheid tot"
+msgstr "Beschikbaarheid t/m"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -163,7 +169,7 @@ msgstr "Beschikbaar tussen"
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.product_template_search_view_pos
 msgid "Available in Self"
-msgstr "Verkrijgbaar in Zelf"
+msgstr "Beschikbaar in zelfbediening"
 
 #. module: pos_self_order
 #: model:ir.model.fields,field_description:pos_self_order.field_product_product__self_order_available
@@ -189,6 +195,7 @@ msgstr "Terug"
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/order_widget/order_widget.js:0
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.xml:0
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -201,6 +208,7 @@ msgstr "Annuleer order"
 #. module: pos_self_order
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/order_widget/order_widget.js:0
+#: code:addons/pos_self_order/static/src/app/pages/cart_page/cart_page.js:0
 #: code:addons/pos_self_order/static/src/app/pages/product_list_page/product_list_page.js:0
 msgid "Cancel order"
 msgstr "Annuleer order"
@@ -805,7 +813,7 @@ msgstr "Even geduld, de prijs wordt geladen..."
 #. odoo-python
 #: code:addons/pos_self_order/models/pos_session.py:0
 msgid "PoS Order by Session"
-msgstr "PoS-order per sessie"
+msgstr "Kassaorder per sessie"
 
 #. module: pos_self_order
 #: model:ir.model,name:pos_self_order.model_pos_load_mixin
@@ -879,6 +887,7 @@ msgstr "Product"
 
 #. module: pos_self_order
 #. odoo-javascript
+#: code:addons/pos_self_order/static/src/app/components/combo_selection/combo_selection.xml:0
 #: code:addons/pos_self_order/static/src/app/components/product_card/product_card.xml:0
 msgid "Product Information"
 msgstr "Productinformatie"
@@ -1170,7 +1179,7 @@ msgstr "De Beschikbaarheid tussen moet groter zijn dan de Beschikbaarheid na."
 #. odoo-python
 #: code:addons/pos_self_order/models/pos_category.py:0
 msgid "The Availability Until must be set between 00:00 and 24:00"
-msgstr "De Beschikbaarheid tot moet zich tussen 00:00 en 24:00 vinden"
+msgstr "De beschikbaarheid t/m moet zich tussen 00:00 en 24:00 vinden."
 
 #. module: pos_self_order
 #. odoo-python
@@ -1187,13 +1196,13 @@ msgstr "Het product moet beschikbaar zijn na dit uur."
 #. module: pos_self_order
 #: model:ir.model.fields,help:pos_self_order.field_pos_category__hour_until
 msgid "The product will be available until this hour."
-msgstr "Het product moet beschikbaar zijn tot dit uur."
+msgstr "Het product moet beschikbaar zijn t/m dit uur."
 
 #. module: pos_self_order
 #. odoo-python
 #: code:addons/pos_self_order/models/res_config_settings.py:0
 msgid "The user must be a POS user"
-msgstr "De gebruiker moet een POS-gebruiker zijn"
+msgstr "De gebruiker moet een Kassa-gebruiker zijn"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1266,6 +1275,12 @@ msgstr "Ja"
 
 #. module: pos_self_order
 #. odoo-python
+#: code:addons/pos_self_order/controllers/orders.py:0
+msgid "You are not authorized to remove this order"
+msgstr "Je bent niet bevoegd om deze bestelling te verwijderen"
+
+#. module: pos_self_order
+#. odoo-python
 #: code:addons/pos_self_order/models/pos_config.py:0
 #: code:addons/pos_self_order/models/res_config_settings.py:0
 msgid "You cannot add cash payment methods in kiosk mode."
@@ -1296,6 +1311,12 @@ msgstr "Je order"
 #: code:addons/pos_self_order/static/src/app/pages/combo_page/combo_page.xml:0
 msgid "Your Selection"
 msgstr "Je selectie"
+
+#. module: pos_self_order
+#. odoo-python
+#: code:addons/pos_self_order/controllers/orders.py:0
+msgid "Your order does not exist or has been removed"
+msgstr "Je bestelling bestaat niet of is verwijderd"
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -1330,12 +1351,6 @@ msgstr "en"
 #: model_terms:ir.ui.view,arch_db:pos_self_order.custom_link_tree
 msgid "empty = all points of sale"
 msgstr "leeg = alle kassasystemen"
-
-#. module: pos_self_order
-#. odoo-javascript
-#: code:addons/pos_self_order/static/src/app/components/popup_table/popup_table.xml:0
-msgid "floor"
-msgstr "verdieping"
 
 #. module: pos_self_order
 #: model_terms:ir.ui.view,arch_db:pos_self_order.custom_link_tree

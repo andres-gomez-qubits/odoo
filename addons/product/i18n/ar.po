@@ -6,16 +6,16 @@
 # Martin Trigaux, 2024
 # Tiffany Chang, 2024
 # Mustafa J. Kadhem <safi2266@gmail.com>, 2024
-# Malaz Abuidris <msea@odoo.com>, 2024
 # Wil Odoo, 2024
+# Malaz Abuidris <msea@odoo.com>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:04+0000\n"
+"POT-Creation-Date: 2025-05-14 20:47+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2024\n"
+"Last-Translator: Malaz Abuidris <msea@odoo.com>, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -533,10 +533,8 @@ msgid "All Product Variants using this Tag"
 msgstr "كافة متغيرات المنتجات التي تستخدم علامة التصنيف هذه"
 
 #. module: product
-#. odoo-javascript
 #. odoo-python
 #: code:addons/product/models/product_pricelist_item.py:0
-#: code:addons/product/static/src/js/pricelist_report/product_pricelist_report.xml:0
 #: model:ir.model.fields.selection,name:product.selection__product_pricelist_item__applied_on__3_global
 #: model_terms:ir.ui.view,arch_db:product.product_tag_form_view
 msgid "All Products"
@@ -904,7 +902,7 @@ msgstr "سعر الكومبو "
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "Combo products can't have attributes."
-msgstr ""
+msgstr "لا يمكن للمنتجات المجمعة أن تحتوي على سمات. "
 
 #. module: product
 #. odoo-python
@@ -2584,7 +2582,7 @@ msgstr "تتم إدارة قوائم الأسعار على"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_variant_easy_edit_view
 msgid "Pricing"
-msgstr "التسعير"
+msgstr "الأسعار "
 
 #. module: product
 #. odoo-javascript
@@ -3539,7 +3537,7 @@ msgstr "سوف تستخدم قائمة الأسعار هذه بدلاً من ا�
 #: code:addons/product/models/product_template.py:0
 msgid ""
 "This product is part of a combo, so its type can't be changed to \"combo\"."
-msgstr ""
+msgstr "هذا المنتج جزء من كومبو، لذلك لا يمكن تغيير نوعه إلى ”كومبو“. "
 
 #. module: product
 #. odoo-python

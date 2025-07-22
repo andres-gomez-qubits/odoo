@@ -15,6 +15,19 @@ export function initElementForEdition(element, options = {}) {
             baseContainerNodeName: "DIV",
         });
     }
+
+    // During `convert_inline`, image elements may receive `width` and `height` attributes,
+    // along with inline styles. These attributes force specific dimensions, which breaks
+    // the fallback to default sizing. We remove them here to allow proper resizing behavior.
+    // The attributes will be re-applied on save.
+    for (const img of element.querySelectorAll("img[width], img[height]")) {
+        const width = img.getAttribute("width");
+        const height = img.getAttribute("height");
+        img.removeAttribute("height");
+        img.removeAttribute("width");
+        img.style.setProperty("width", width);
+        img.style.setProperty("height", height);
+    }
 }
 
 /**
@@ -30,7 +43,7 @@ export function fixInvalidHTML(content) {
     }
     // TODO: improve the regex to support nodes with data-attributes containing
     // `/` and `>` characters.
-    const regex = /<\s*(a|strong|t)[^<]*?\/\s*>/g;
+    const regex = /<\s*(a|strong|t|span)[^<]*?\/\s*>/g;
     return content.replace(regex, (match, g0) => match.replace(/\/\s*>/, `></${g0}>`));
 }
 

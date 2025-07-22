@@ -3,15 +3,15 @@
 # 	* hr
 # 
 # Translators:
-# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2024
-# Wil Odoo, 2024
+# Wil Odoo, 2025
+# Patricia Gutiérrez Capetillo <pagc@odoo.com>, 2025
 # Fernanda Alvarez, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:23+0000\n"
+"POT-Creation-Date: 2025-03-19 20:36+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Fernanda Alvarez, 2025\n"
 "Language-Team: Spanish (Latin America) (https://app.transifex.com/odoo/teams/41243/es_419/)\n"
@@ -100,8 +100,8 @@ msgid ""
 "<b>Congratulations!</b> May I recommend you to setup an <a "
 "href=\"%s\">onboarding plan?</a>"
 msgstr ""
-"<b>¡Felicidades!</b> ¿Puedo recomendarle que configure un<a href=\"%s\">plan"
-" de integración?</a>"
+"<b>¡Felicidades!</b> ¿Puedo recomendarle que configure un <a "
+"href=\"%s\">plan de capacitación?</a>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_department_view_kanban
@@ -1212,7 +1212,7 @@ msgstr "Divorciado"
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__certificate__doctor
 msgid "Doctor"
-msgstr "Doctor"
+msgstr "Doctorado"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__driving_license
@@ -1268,7 +1268,7 @@ msgstr "Correo electrónico"
 #. module: hr
 #: model:ir.model,name:hr.model_mail_alias
 msgid "Email Aliases"
-msgstr "Seudónimos de correos"
+msgstr "Seudónimos de correo"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_profile
@@ -1477,7 +1477,7 @@ msgstr "Experiencia en redacción de contenido en línea"
 #. module: hr
 #: model:hr.job,name:hr.job_developer
 msgid "Experienced Developer"
-msgstr "Desarrollador experimentado"
+msgstr "Desarrollador con experiencia"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__share
@@ -1774,8 +1774,7 @@ msgstr "Número de identificación"
 #: model:ir.model.fields,help:hr.field_hr_employee__message_needaction
 #: model:ir.model.fields,help:hr.field_hr_job__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr ""
-"Si se encuentra seleccionado, hay nuevos mensajes que requieren su atención."
+msgstr "Si está seleccionado, hay nuevos mensajes que requieren tu atención."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_department__message_has_error
@@ -1785,7 +1784,7 @@ msgstr ""
 #: model:ir.model.fields,help:hr.field_hr_job__message_has_error
 #: model:ir.model.fields,help:hr.field_hr_job__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "Si se encuentra seleccionado, algunos mensajes tienen error de envío."
+msgstr "Si está seleccionado, algunos mensajes tienen error de envío."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__active
@@ -2904,6 +2903,11 @@ msgid "Resource Calendar"
 msgstr "Calendario de recursos"
 
 #. module: hr
+#: model:ir.model,name:hr.model_resource_calendar
+msgid "Resource Working Time"
+msgstr "Tiempo de trabajo de recursos"
+
+#. module: hr
 #: model:ir.model,name:hr.model_resource_resource
 msgid "Resources"
 msgstr "Recursos"
@@ -3239,10 +3243,10 @@ msgid ""
 "              He defines the products and customers portfolio according to the marketing plan.\n"
 "              This mission requires strong collaboration with Technical Service and Sales."
 msgstr ""
-"El gerente de marketing define la estrategia de marketing a mediano y a largo plazo para sus segmentos cubiertos de mercado en el mundo. \n"
-"              Desarrolla y vigila el presupuesto anual en colaboración con el área de Ventas.\n"
-"              Define el portafolio de productos y clientes de acuerdo con el plan de marketing.\n"
-"              Esta tarea requiere una colaboración sólida con Servicios técnicos y Ventas."
+"El gerente de marketing define la estrategia de marketing a mediano y a largo plazo para los segmentos de mercado que cubre\n"
+"                a nivel mundial. Desarrolla y vigila el presupuesto anual en colaboración con el área de Ventas. Define el portafolio de productos\n"
+"                y clientes de acuerdo con el plan de marketing.\n"
+"                Esta tarea requiere que colabore de forma estrecha con Servicio técnico y Ventas."
 
 #. module: hr
 #. odoo-python

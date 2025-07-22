@@ -3,14 +3,14 @@
 # 	* hr
 # 
 # Translators:
-# Wil Odoo, 2024
+# Wil Odoo, 2025
 # Manon Rondou, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:23+0000\n"
+"POT-Creation-Date: 2025-03-19 20:36+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Manon Rondou, 2025\n"
 "Language-Team: French (https://app.transifex.com/odoo/teams/41243/fr/)\n"
@@ -2896,6 +2896,11 @@ msgid "Resource Calendar"
 msgstr "Calendrier de la ressource"
 
 #. module: hr
+#: model:ir.model,name:hr.model_resource_calendar
+msgid "Resource Working Time"
+msgstr "Temps de travail de la ressource"
+
+#. module: hr
 #: model:ir.model,name:hr.model_resource_resource
 msgid "Resources"
 msgstr "Ressources"
@@ -3680,7 +3685,7 @@ msgstr "Téléphone professionnel"
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__employee_type__worker
 msgid "Worker"
-msgstr "Travailleur"
+msgstr "Ouvrier"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__resource_calendar_id

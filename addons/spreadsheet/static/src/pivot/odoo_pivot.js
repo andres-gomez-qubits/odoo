@@ -151,6 +151,7 @@ export class OdooPivot {
 
     async loadMetadata() {
         this._fields = await this.loader.getFields(this.coreDefinition.model);
+        await this._loadPropertiesDefinitions();
     }
 
     async getModelLabel() {
@@ -194,6 +195,7 @@ export class OdooPivot {
             {
                 orm: this.odooDataProvider.orm,
                 serverData: this.odooDataProvider.serverData,
+                getters: this.getters,
             }
         );
         return { model, definition };
@@ -454,6 +456,31 @@ export class OdooPivot {
         return this.loader.assertIsValid({ throwOnError });
     }
 
+    /**
+     * @private
+     */
+    async _loadPropertiesDefinitions() {
+        // properties are fake fields with the shape "<property_field>.<uuid>"
+        const orm = this.odooDataProvider.orm;
+        const properties = this.coreDefinition.rows
+            .concat(this.coreDefinition.columns)
+            .filter((dimension) => dimension.fieldName.includes("."));
+        await Promise.all(
+            properties.map((dimension) =>
+                orm
+                    .call(this.coreDefinition.model, "get_property_definition", [
+                        dimension.fieldName,
+                    ])
+                    .then((propertyDefinition) => {
+                        this._fields[dimension.fieldName] = {
+                            ...propertyDefinition,
+                            name: dimension.fieldName,
+                        };
+                    })
+            )
+        );
+    }
+
     //--------------------------------------------------------------------------
     // Global filters
     //--------------------------------------------------------------------------
@@ -503,6 +530,15 @@ export class OdooPivotRuntimeDefinition extends PivotRuntimeDefinition {
         this._model = definition.model;
         /** @type {SortedColumn} */
         this._sortedColumn = definition.sortedColumn;
+
+        // Ensure that the sorted column is a measure
+        // and if not, drop it.
+        // This situation can happen because of a bug in a previous version
+        const measureNames = definition.measures.map((field) => field.fieldName);
+        if (definition.sortedColumn && !measureNames.includes(definition.sortedColumn.measure)) {
+            this._sortedColumn = undefined;
+        }
+
         for (const dimension of this.columns.concat(this.rows)) {
             if (
                 (dimension.type === "date" || dimension.type === "datetime") &&

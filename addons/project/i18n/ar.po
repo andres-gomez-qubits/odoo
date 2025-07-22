@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:39+0000\n"
+"POT-Creation-Date: 2025-06-27 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Malaz Abuidris <msea@odoo.com>, 2025\n"
 "Language-Team: Arabic (https://app.transifex.com/odoo/teams/41243/ar/)\n"
@@ -163,7 +163,6 @@ msgstr "عدد التقييمات "
 #. module: project
 #. odoo-javascript
 #: code:addons/project/static/src/views/burndown_chart/burndown_chart_model.js:0
-#: model:ir.model.fields,field_description:project.field_project_milestone__task_count
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__nbr
 msgid "# of Tasks"
 msgstr "عدد المهام"
@@ -873,6 +872,7 @@ msgid ""
 "Add project-specific property fields on tasks to customize your project "
 "management process."
 msgstr ""
+"قم بإضافة حقول خصائص خاصة بالمشروع في المهام لتخصيص عملية إدارة مشروعك. "
 
 #. module: project
 #. odoo-javascript
@@ -3971,6 +3971,9 @@ msgid ""
 "Edit with limited access: collaborators can view and edit tasks they follow in the Kanban view.\n"
 "Edit: collaborators can view and edit all tasks in the Kanban view. Additionally, they can choose which tasks they want to follow."
 msgstr ""
+"للقراءة: بإمكان المتعاونين عرض المهام ولكن ليس تحريرها.\n"
+"التحرير مع الوصول المحدود: بإمكان المتعاونين عرض المهام التي يتابعونها وتحريرها في نافذة عرض كانبان.\n"
+"التحرير: بإمكان المتعاونين عرض كافة المهام وتحريرها في نافذة عرض كانبان. إضافة إلى ذلك، يمكنهم اختيار المهام التي يرغبون في متابعتها. "
 
 #. module: project
 #: model:mail.template,subject:project.mail_template_data_project_task
@@ -4980,6 +4983,10 @@ msgid ""
 "on your website. This includes leads/opportunities, quotations/sales orders,"
 " purchase orders, invoices and bills, timesheets, and tickets."
 msgstr ""
+"يمكنهم تحرير مهام المشروع المشتركة وعرض مستندات محددة في وضع القراءة على "
+"موقعك الإلكتروني. يتضمن ذلك العملاء المهتمين/الفرص، وعروض الأسعار/أوامر "
+"البيع، وأوامر الشراء، وفواتير العملاء وفواتير المورّدين، والجداول الزمنية، "
+"والتذاكر. "
 
 #. module: project
 #. odoo-python
@@ -5389,7 +5396,7 @@ msgstr "الاستخدام في مشروعي "
 #: model_terms:digest.tip,tip_description:project.digest_tip_project_2
 msgid ""
 "Use personal stages to organize your tasks and create your own workflow."
-msgstr ""
+msgstr "استخدم المراحل الشخصية لتنظيم مهامك وإنشاء سير العمل الخاص بك. "
 
 #. module: project
 #: model_terms:ir.actions.act_window,help:project.project_tags_action
@@ -5893,12 +5900,6 @@ msgstr "لتعيين المهمة كملغية. "
 #: code:addons/project/static/src/xml/project_task_kanban_examples.xml:0
 msgid "state to mark the task as complete."
 msgstr "لتعيين المهمة كمنتهية. "
-
-#. module: project
-#. odoo-javascript
-#: code:addons/project/static/src/project_sharing/components/chatter/chatter_composer.xml:0
-msgid "state.message"
-msgstr "state.message"
 
 #. module: project
 #. odoo-javascript

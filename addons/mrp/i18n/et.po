@@ -4,7 +4,6 @@
 # 
 # Translators:
 # Arma Gedonsky <armagedonsky@hot.ee>, 2024
-# Tairi Tiimann, 2024
 # Patrick-Jordan Kiudorv, 2024
 # Martin Aavastik <martin@avalah.ee>, 2024
 # Algo Kärp <algokarp@gmail.com>, 2024
@@ -14,18 +13,19 @@
 # Martin Trigaux, 2024
 # Katrin Kampura, 2024
 # Stevin Lilla, 2024
-# Siim Raasuke, 2024
 # JanaAvalah, 2024
 # Leaanika Randmets, 2024
 # Triine Aavik <triine@avalah.ee>, 2024
+# Siim Raasuke, 2025
+# Tairi Tiimann, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:22+0000\n"
+"POT-Creation-Date: 2025-06-13 18:36+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Triine Aavik <triine@avalah.ee>, 2024\n"
+"Last-Translator: Tairi Tiimann, 2025\n"
 "Language-Team: Estonian (https://app.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -456,7 +456,7 @@ msgstr "<span>Tegevused</span>"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
 msgid "<span>Generate BOM</span>"
-msgstr "<span> Genereeri BOM<(span>"
+msgstr "<span>Genereeri BOM</span>"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.stock_production_type_kanban
@@ -2058,6 +2058,7 @@ msgid "Disassembly Order"
 msgstr "Demonteerimise tellimus"
 
 #. module: mrp
+#: model_terms:ir.ui.view,arch_db:mrp.mrp_production_form_view
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_unbuild_form_view_simplified
 #: model_terms:ir.ui.view,arch_db:mrp.view_change_production_qty_wizard
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_batch_produce_form
@@ -2568,6 +2569,11 @@ msgstr "On sõnum"
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__has_routing_lines
 msgid "Has Routing Lines"
 msgstr "Omab marsruudi ridu"
+
+#. module: mrp
+#: model:ir.model.fields,field_description:mrp.field_mrp_workorder__has_worksheet
+msgid "Has Worksheet"
+msgstr ""
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__product_document__attached_on_mrp__hidden
@@ -3547,7 +3553,7 @@ msgstr "Minu tegevuse tähtaeg"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_mrp_production_filter
 msgid "My MOs"
-msgstr ""
+msgstr "Minu Tootmistellimused"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__never_product_template_attribute_value_ids
@@ -6940,14 +6946,14 @@ msgstr "asukohast"
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_bom_form_view
 msgid "it is added as a component in a manufacturing order"
-msgstr ""
+msgstr "see lisatakse komponendina tootmistellimustele"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_bom_form_view
 msgid ""
 "it is moved via a transfer, such as a receipt or a delivery order for "
 "instance."
-msgstr ""
+msgstr "liigutatakse laosiirdega, näiteks kauba vastuvõtu või tarne korral."
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_form_view
@@ -7009,23 +7015,3 @@ msgstr "poolita"
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_routing_workcenter_form_view
 msgid "work orders"
 msgstr "töökäsul"
-
-#. module: mrp
-#. odoo-javascript
-#: code:addons/mrp/static/src/components/mo_overview_line/mrp_mo_overview_line.xml:0
-msgid "{{ foldButtonTitle }}"
-msgstr "{{ foldButtonTitle }}"
-
-#. module: mrp
-#. odoo-javascript
-#: code:addons/mrp/static/src/components/bom_overview_line/mrp_bom_overview_line.xml:0
-#: code:addons/mrp/static/src/components/bom_overview_special_line/mrp_bom_overview_special_line.xml:0
-msgid "{{ props.isFolded ? 'Unfold' : 'Fold' }}"
-msgstr "{{ props.isFolded ? 'Unfold' : 'Fold' }}"
-
-#. module: mrp
-#. odoo-javascript
-#: code:addons/mrp/static/src/components/mo_overview_byproducts_block/mrp_mo_overview_byproducts_block.xml:0
-#: code:addons/mrp/static/src/components/mo_overview_operations_block/mrp_mo_overview_operations_block.xml:0
-msgid "{{ state.isFolded ? 'Unfold' : 'Fold' }}"
-msgstr "{{ state.isFolded ? 'Unfold' : 'Fold' }}"

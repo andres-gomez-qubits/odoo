@@ -3,17 +3,17 @@
 # 	* website_sale
 # 
 # Translators:
-# Sarah Park, 2024
-# Wil Odoo, 2025
 # Daye Jeong, 2025
+# Wil Odoo, 2025
+# Sarah Park, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:02+0000\n"
+"POT-Creation-Date: 2025-07-11 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Daye Jeong, 2025\n"
+"Last-Translator: Sarah Park, 2025\n"
 "Language-Team: Korean (https://app.transifex.com/odoo/teams/41243/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -579,6 +579,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website_sale.product_custom_text
 msgid "<u>Terms and Conditions</u>"
 msgstr "<u>이용 약관</u>"
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/combo_configurator.py:0
+msgid "A combo product can't be empty. Please select at least one option."
+msgstr "콤보 상품은 비워둘 수 없습니다. 최소한 하나 이상 옵션을 선택해 주세요."
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_delivery_carrier__website_description
@@ -1398,23 +1404,39 @@ msgstr "배송비를 계산하고 Shiprocket으로 배송하기"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with DHL"
-msgstr "DHL로 배송비를 계산 및 배송합니다."
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                            <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"배송비 계산 후 DHL로 발송하세요.<br/>\n"
+"                            <strong>(홈&gt;앱 으로 이동하여 설치하세요)</strong>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with FedEx"
-msgstr "FedEx로 배송비를 계산 및 배송합니다."
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                            <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"배송비 계산 후 FedEx로 발송하세요.<br/>\n"
+"                            <strong>(홈&gt;앱 으로 이동하여 설치하세요)</strong>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with UPS"
-msgstr "UPS로 배송비를 계산 및 배송합니다."
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                            <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"배송비 계산 후 UPS로 발송하세요.<br/>\n"
+"                            <strong>(홈&gt;앱 으로 이동하여 설치하세요)</strong>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with USPS"
-msgstr "USPS로 배송비를 계산 및 배송합니다."
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                            <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+"배송비 계산 후 USPS로 발송하세요.<br/>\n"
+"                            <strong>(홈&gt;앱 으로 이동하여 설치하세요)</strong>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
@@ -1425,6 +1447,12 @@ msgstr "bpost로 배송비를 계산 및 배송합니다."
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
 msgid "Compute shipping costs on orders"
 msgstr "주문 시 배송비를 계산합니다."
+
+#. module: website_sale
+#. odoo-javascript
+#: code:addons/website_sale/static/src/js/checkout.js:0
+msgid "Computed after delivery"
+msgstr "배송 후 계산"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -1660,13 +1688,8 @@ msgstr "사용자 지정 이메일 서식"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "DHL Express Connector"
-msgstr "DHL 익스프레스 배송업체"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "DHL Shipping Methods"
-msgstr "DHL 배송 방법"
+msgid "DHL"
+msgstr "DHL"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
@@ -1760,11 +1783,6 @@ msgstr "배송 주소"
 #: model:product.public.category,name:website_sale.public_category_services_delivery_and_installation
 msgid "Delivery and Installation"
 msgstr "배송 및 설치"
-
-#. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.total
-msgid "Delivery will be updated after choosing a new delivery method"
-msgstr "새로운 배송 방법을 선택하면 배송이 업데이트됩니다"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_searchbar_input_snippet_options
@@ -1897,6 +1915,11 @@ msgstr "사용 권한 없음, 이 데이터는 사용자 요약 이메일에서 
 #: code:addons/website_sale/static/src/js/website_sale_reorder.js:0
 msgid "Do you wish to clear your cart before adding products to it?"
 msgstr "장바구니에 상품을 추가하기 전에 장바구니를 비울까요?"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
+msgid "Documentation"
+msgstr "관련 문서"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product
@@ -2121,11 +2144,6 @@ msgid "FedEx"
 msgstr "FedEx"
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "FedEx Shipping Methods"
-msgstr "FedEx 배송 방법"
-
-#. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website_sale_extra_field__field_id
 msgid "Field"
 msgstr "필드"
@@ -2154,6 +2172,13 @@ msgstr "채우기"
 #: model_terms:ir.ui.view,arch_db:website_sale.address
 msgid "Fill in your address"
 msgstr "주소를 입력하세요"
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/models/product_template.py:0
+msgid ""
+"Final price may vary based on selection. Tax will be calculated at checkout."
+msgstr "최종 가격은 선택한 항목에 따라 달라질 수 있습니다. 세금은 결제 시 계산됩니다."
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website__fiscal_position_id
@@ -2803,7 +2828,7 @@ msgstr "제품명 순 (A-Z)"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_sale_order_line__name_short
 msgid "Name Short"
-msgstr "단축 이름"
+msgstr "단축명"
 
 #. module: website_sale
 #. odoo-python
@@ -3090,7 +3115,7 @@ msgstr "주문"
 #. module: website_sale
 #: model:ir.actions.act_window,name:website_sale.sale_order_action_to_invoice
 msgid "Orders To Invoice"
-msgstr "주문 후 청구서 발행"
+msgstr "청구할 주문서"
 
 #. module: website_sale
 #: model:product.ribbon,name:website_sale.out_of_stock_ribbon
@@ -3153,6 +3178,12 @@ msgstr "결제 토큰"
 #: model:ir.ui.menu,name:website_sale.menu_ecommerce_payment_transactions
 msgid "Payment Transactions"
 msgstr "결제 거래"
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/payment.py:0
+msgid "Payment is already being processed."
+msgstr "결제가 이미 처리 중입니다."
 
 #. module: website_sale
 #. odoo-python
@@ -3259,6 +3290,11 @@ msgstr "단위 당 가격"
 #: model:ir.model.fields,field_description:website_sale.field_website__pricelist_ids
 msgid "Price list available for this Ecommerce/Website"
 msgstr "이 전자 상거래/웹 사이트에서 사용할 수있는 가격표"
+
+#. module: website_sale
+#: model_terms:ir.ui.view,arch_db:website_sale.total
+msgid "Price will be updated after choosing a delivery method"
+msgstr "새로운 배송 방법을 선택하면 요금이 업데이트됩니다"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_product_pricelist
@@ -3554,7 +3590,7 @@ msgstr "웹사이트에 게시"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_search_view_website
 #: model_terms:ir.ui.view,arch_db:website_sale.view_delivery_carrier_search
 msgid "Published"
-msgstr "게시 됨"
+msgstr "게시 완료"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
@@ -3833,7 +3869,7 @@ msgstr "영업팀"
 #: model:ir.model.fields,field_description:website_sale.field_res_config_settings__salesperson_id
 #: model:ir.model.fields,field_description:website_sale.field_website__salesperson_id
 msgid "Salesperson"
-msgstr "영업사원"
+msgstr "영업 담당자"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.billing_address_row
@@ -4265,6 +4301,12 @@ msgstr "유효하지 않은 액세스 토큰입니다."
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/payment.py:0
+msgid "The cart has already been paid. Please refresh the page."
+msgstr "장바구니가 이미 결제되었습니다. 페이지를 새로고침하세요."
+
+#. module: website_sale
+#. odoo-python
+#: code:addons/website_sale/controllers/payment.py:0
 msgid "The cart has been updated. Please refresh the page."
 msgstr "장바구니가 업데이트되었습니다. 페이지를 새로고침 하세요."
 
@@ -4298,6 +4340,7 @@ msgstr "주어진 상품이 존재하지 않으므로 장바구니에 추가할 
 
 #. module: website_sale
 #. odoo-python
+#: code:addons/website_sale/controllers/combo_configurator.py:0
 #: code:addons/website_sale/models/sale_order.py:0
 msgid ""
 "The given product does not have a price therefore it cannot be added to "
@@ -4513,11 +4556,6 @@ msgid "USPS"
 msgstr "USPS"
 
 #. module: website_sale
-#: model_terms:ir.ui.view,arch_db:website_sale.res_config_settings_view_form
-msgid "USPS Shipping Methods"
-msgstr "USPS 배송 방법"
-
-#. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_drawers_underbed
 msgid "Under-bed Drawers"
 msgstr "침대 밑 서랍"
@@ -4676,7 +4714,7 @@ msgstr "옷장"
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_lines
 #: model_terms:ir.ui.view,arch_db:website_sale.checkout_layout
 msgid "Warning"
-msgstr "경고"
+msgstr "주의"
 
 #. module: website_sale
 #: model:product.template,name:website_sale.product_product_1_product_template

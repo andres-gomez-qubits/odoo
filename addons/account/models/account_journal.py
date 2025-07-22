@@ -325,7 +325,7 @@ class AccountJournal(models.Model):
         method_information_mapping = results['method_information_mapping']
         providers_per_code = results['providers_per_code']
 
-        journal_bank_cash = self.filtered(lambda j: j.type in ('bank', 'cash'))
+        journal_bank_cash = self.filtered(lambda j: j.type in ('bank', 'cash', 'credit'))
         journal_other = self - journal_bank_cash
         journal_other.available_payment_method_ids = False
 
@@ -901,14 +901,9 @@ class AccountJournal(models.Model):
     def _compute_display_name(self):
         for journal in self:
             name = journal.name
-            if journal.currency_id and journal.currency_id != journal.company_id.currency_id:
+            if journal.currency_id and journal.currency_id != journal.company_id.sudo().currency_id:
                 name = f"{name} ({journal.currency_id.name})"
             journal.display_name = name
-
-    def action_archive(self):
-        if self.env['account.payment.method.line'].search_count([('journal_id', 'in', self.ids)], limit=1):
-            raise ValidationError(_("This journal is associated with a payment method. You cannot archive it"))
-        return super().action_archive()
 
     def action_configure_bank_journal(self):
         """ This function is called by the "configure" button of bank journals,

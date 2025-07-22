@@ -4,19 +4,20 @@
 # 
 # Translators:
 # guohuadeng <guohuadeng@hotmail.com>, 2024
-# Odoo哥 <vnsoft.he@gmail.com>, 2024
 # Chill Liao <chill421@qq.com>, 2024
 # Raymond Yu <cl_yu@hotmail.com>, 2024
-# Wil Odoo, 2024
 # Chloe Wang, 2025
+# 何彬 <vnsoft.he@gmail.com>, 2025
+# Jeffery CHEN <jeffery9@gmail.com>, 2025
+# Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:02+0000\n"
+"POT-Creation-Date: 2025-07-11 18:38+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: Chloe Wang, 2025\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Chinese (China) (https://app.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -770,6 +771,11 @@ msgid "<strong>Customer Address</strong>"
 msgstr "<strong>客户地址</strong>"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
+msgid "<strong>Delivered</strong>"
+msgstr "<strong>已送达</strong>"
+
+#. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<strong>Delivery address</strong>"
 msgstr "<strong>送货地址</strong>"
@@ -807,6 +813,11 @@ msgstr "<strong>最小数量：</strong>"
 #: model_terms:ir.ui.view,arch_db:stock.report_picking
 msgid "<strong>Order</strong>"
 msgstr "<strong>订单</strong>"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.report_delivery_document
+msgid "<strong>Ordered</strong>"
+msgstr "<strong>已订购</strong>"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.report_package_barcode
@@ -1889,6 +1900,13 @@ msgstr "计算运输成本并用DHL装运"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Compute shipping costs and ship with Easypost"
 msgstr "计算运输成本并用Easypost装运"
 
@@ -1896,6 +1914,13 @@ msgstr "计算运输成本并用Easypost装运"
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Compute shipping costs and ship with FedEx"
 msgstr "计算运输成本并用FedEX装运"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -1919,8 +1944,22 @@ msgstr "计算运输成本并用UPS装运"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Compute shipping costs and ship with USPS"
 msgstr "计算运输成本并用USPS装运"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -2429,6 +2468,11 @@ msgstr "演示源显示名称"
 #: model_terms:ir.ui.view,arch_db:stock.report_reception_body
 msgid "DEMO_UOM"
 msgstr "DEMO_UOM"
+
+#. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
+msgid "DHL Connector"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_dhl
@@ -3023,7 +3067,7 @@ msgstr "显示导入批次"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__group_lot_on_delivery_slip
 msgid "Display Lots & Serial Numbers on Delivery Slips"
-msgstr "在送货单上显示批次和序列号"
+msgstr "在送货单上显示批次 / 序列号"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_lot_label_layout__display_name
@@ -3097,6 +3141,7 @@ msgid "Do you confirm you want to scrap"
 msgstr "您确定要报废吗"
 
 #. module: stock
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_type_form
 msgid "Documentation"
 msgstr "文档"
@@ -3322,6 +3367,7 @@ msgstr "二月"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_fedex
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "FedEx Connector"
 msgstr "FedEx 连接器"
 
@@ -5015,7 +5061,7 @@ msgstr "批次/序列号："
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__group_stock_production_lot
 msgid "Lots & Serial Numbers"
-msgstr "批次和序列号"
+msgstr "批次 / 序列号"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -5571,7 +5617,7 @@ msgstr "还没有上架规则。 让我们创建一个！"
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.help_message_template
 msgid "No receipt yet! Create a new one."
-msgstr "暂无收据！创建新收据。"
+msgstr "暂无收货！创建新收货。"
 
 #. module: stock
 #: model_terms:ir.actions.act_window,help:stock.action_orderpoint
@@ -6468,7 +6514,7 @@ msgstr "是否存在取决于作业类型。"
 msgid ""
 "Press the \"New\" button to define the quantity for a product in your stock "
 "or import quantities from a spreadsheet via the Actions menu"
-msgstr ""
+msgstr "点击【新增】按钮，为产品设定库存数量，或通过【操作】菜单从电子表格导入数量。"
 
 #. module: stock
 #. odoo-javascript
@@ -7263,7 +7309,7 @@ msgstr "收货路线"
 #: model:stock.picking.type,name:stock.picking_type_in
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Receipts"
-msgstr "收据"
+msgstr "收货"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_form
@@ -8165,7 +8211,7 @@ msgstr ""
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "Set expiration dates on lots & serial numbers"
-msgstr "为批次和序列号设置有效期"
+msgstr "为批次 / 序列号设置有效期"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -8868,6 +8914,14 @@ msgstr "“手动作业”的值会在当前作业之后创建库存调拨。当
 #: code:addons/stock/models/stock_quant.py:0
 msgid "The Lot/Serial number (%s) is linked to another product."
 msgstr "批次/序列号（%s）与另一个产品有关联。"
+
+#. module: stock
+#. odoo-python
+#: code:addons/stock/models/stock_picking.py:0
+msgid ""
+"The Picking Operations report has been deleted so you cannot print at this "
+"time unless the report is restored."
+msgstr "拣选操作报告已被删除，除非恢复该报告，否则目前无法打印。"
 
 #. module: stock
 #. odoo-python
@@ -9626,7 +9680,7 @@ msgid ""
 "Track following dates on lots & serial numbers: best before, removal, end of life, alert. \n"
 " Such dates are set automatically at lot/serial number creation based on values set on the product (in days)."
 msgstr ""
-"追溯以下日期的批次和序列号：最佳日期、删除、生命尽头、警报。\n"
+"追溯以下日期的批次 / 序列号：最佳日期、删除、生命尽头、警报。\n"
 "这些日期是根据产品上在批次/序列号创建时自动设置的值（以天为单位）。"
 
 #. module: stock
@@ -9635,7 +9689,7 @@ msgid ""
 "Track following dates on lots & serial numbers: best before, removal, end of"
 " life, alert. Such dates are set automatically at lot/serial number creation"
 " based on values set on the product (in days)."
-msgstr "追溯以下日期的批次和序列号：最佳日期、删除、生命尽头、警报。 这些日期是根据产品设置的值（以天为单位）在批次/序列号创建时自动设置的。"
+msgstr "追溯以下日期的批次 / 序列号：最佳日期、删除、生命尽头、警报。 这些日期是根据产品设置的值（以天为单位）在批次/序列号创建时自动设置的。"
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
@@ -9797,11 +9851,13 @@ msgstr "记录中异常活动的类型。"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_ups
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "UPS Connector"
 msgstr "UPS 连接器"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_res_config_settings__module_delivery_usps
+#: model_terms:ir.ui.view,arch_db:stock.res_config_settings_view_form
 msgid "USPS Connector"
 msgstr "USPS 连接器"
 
@@ -10016,7 +10072,7 @@ msgstr "使用现有的"
 msgid ""
 "Use GS1 nomenclature datamatrix whenever barcodes are printed for lots and "
 "serial numbers."
-msgstr "每当打印批次和序列号的条形码时，请使用 GS1 命名法 datamatrix。"
+msgstr "每当打印批次 / 序列号的条形码时，请使用 GS1 命名法 datamatrix。"
 
 #. module: stock
 #: model:res.groups,name:stock.group_reception_report
@@ -10419,10 +10475,10 @@ msgstr "当产品到达"
 msgid ""
 "When products are needed in <b>%(destination)s</b>, <br> "
 "<b>%(operation)s</b> are created from <b>%(source_location)s</b> to fulfill "
-"the need."
+"the need. %(suffix)s"
 msgstr ""
 "当 <b>%(destination)s</b> 需要产品时，<br>会自动创建<b>%(operation)s</b> 操作，由 "
-"<b>%(source_location)s</b> 调配产品，以满足需求。"
+"<b>%(source_location)s</b> 调配产品，以满足需求。%(suffix)s"
 
 #. module: stock
 #. odoo-python

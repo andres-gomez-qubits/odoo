@@ -147,38 +147,53 @@ class AccountAccount(models.Model):
         if fname == 'code':
             return self.with_company(self.env.company.root_id).sudo()._field_to_sql(alias, 'code_store', query, flush)
         if fname == 'placeholder_code':
-            query.add_join(
-                'JOIN',
-                'account_first_company',
-                SQL(
-                    """(
-                        SELECT DISTINCT ON (rel.account_account_id)
-                               rel.account_account_id AS account_id,
-                               rel.res_company_id AS company_id,
-                               SPLIT_PART(res_company.parent_path, '/', 1) AS root_company_id,
-                               res_company.name AS company_name
-                          FROM account_account_res_company_rel rel
-                          JOIN res_company
-                            ON res_company.id = rel.res_company_id
-                         WHERE rel.res_company_id IN %(authorized_company_ids)s
-                      ORDER BY rel.account_account_id, company_id
-                    )""",
-                    authorized_company_ids=self.env.user._get_company_ids(),
-                ),
-                SQL('account_first_company.account_id = %(account_id)s', account_id=SQL.identifier(alias, 'id')),
-            )
+            if 'account_first_company' not in query._joins:
+                # When multiple accounts are selected, ``placeholder_code`` is used for all of them
+                # as it is in the default ``_order`` (e.g., for ``account_asset_id`` and
+                # ``account_depreciation_id`` in ``account_assets``).
 
-            # Can't have spaces because of how stupidly the `Model._read_group_orderby` method is written
-            # see https://github.com/odoo/odoo/blob/2a3466e8f86bc08594391658e08ba3416fb8307b/odoo/models.py#L2222
+                # As ``placeholder_code`` represents the account's code in the first active company
+                # to which the account belongs in the hierarchy, we must ensure that we do not introduce
+                # a second ``JOIN`` to the account-company relation to avoid redundancy in joins.
+                query.add_join(
+                    'LEFT JOIN',
+                    'account_first_company',
+                    SQL(
+                        """(
+                            SELECT DISTINCT ON (rel.account_account_id)
+                                rel.account_account_id AS account_id,
+                                rel.res_company_id AS company_id,
+                                SPLIT_PART(res_company.parent_path, '/', 1) AS root_company_id,
+                                res_company.name AS company_name
+                            FROM account_account_res_company_rel rel
+                            JOIN res_company
+                                ON res_company.id = rel.res_company_id
+                            WHERE rel.res_company_id IN %(authorized_company_ids)s
+                        ORDER BY rel.account_account_id, company_id
+                        )""",
+                        authorized_company_ids=self.env.user._get_company_ids(),
+                        to_flush=self._fields['company_ids'],
+                    ),
+                    SQL('account_first_company.account_id = %(account_id)s', account_id=SQL.identifier(alias, 'id')),
+                )
+
             return SQL(
-                "COALESCE("
-                "%(code_store)s->>%(active_company_root_id)s,"
-                "%(code_store)s->>%(account_first_company_root_id)s||'('||%(account_first_company_name)s||')'"
-                ")",
+                """
+                    COALESCE(
+                        %(code_store)s->>%(active_company_root_id)s,
+                        %(code_store)s->>%(account_first_company_root_id)s || ' (' || %(account_first_company_name)s || ')'
+                    )
+                """,
                 code_store=SQL.identifier(alias, 'code_store'),
-                active_company_root_id=self.env.company.root_id.id,
+                active_company_root_id=str(self.env.company.root_id.id),
                 account_first_company_name=SQL.identifier('account_first_company', 'company_name'),
                 account_first_company_root_id=SQL.identifier('account_first_company', 'root_company_id'),
+                to_flush=self._fields['code_store'],
+            )
+        if fname == 'root_id':
+            return SQL(
+                "SUBSTRING(%(placeholder_code)s, 1, 2)",
+                placeholder_code=self._field_to_sql(alias, 'placeholder_code', query, flush),
             )
 
         return super()._field_to_sql(alias, fname, query, flush)
@@ -406,11 +421,11 @@ class AccountAccount(models.Model):
                     record.placeholder_code = f'{code} ({company.name})'
 
     def _search_placeholder_code(self, operator, value):
-        if operator != '=like':
+        if operator != '=ilike':
             raise NotImplementedError
         query = Query(self.env, 'account_account')
         placeholder_code_sql = self.env['account.account']._field_to_sql('account_account', 'placeholder_code', query)
-        query.add_where(SQL("%s LIKE %s", placeholder_code_sql, value))
+        query.add_where(SQL("%s ILIKE %s", placeholder_code_sql, value))
         return [('id', 'in', query)]
 
     @api.depends_context('company')
@@ -422,7 +437,7 @@ class AccountAccount(models.Model):
     def _search_account_root(self, operator, value):
         if operator in ['=', 'child_of']:
             root = self.env['account.root'].browse(value)
-            return [('placeholder_code', '=like', root.name + ('' if operator == '=' and not root.parent_id else '%'))]
+            return [('placeholder_code', '=ilike', root.name + ('' if operator == '=' and not root.parent_id else '%'))]
         raise NotImplementedError
 
     def _search_panel_domain_image(self, field_name, domain, set_count=False, limit=False):
@@ -690,7 +705,7 @@ class AccountAccount(models.Model):
                 account.reconcile = False
             elif account.account_type in ('asset_receivable', 'liability_payable'):
                 account.reconcile = True
-            elif account.account_type == 'asset_cash':
+            elif account.account_type in ('asset_cash', 'liability_credit_card', 'off_balance'):
                 account.reconcile = False
             # For other asset/liability accounts, don't do any change to account.reconcile.
 
@@ -749,7 +764,7 @@ class AccountAccount(models.Model):
         return defaults
 
     @api.model
-    def _get_most_frequent_accounts_for_partner(self, company_id, partner_id, move_type, filter_never_user_accounts=False, limit=None):
+    def _get_most_frequent_accounts_for_partner(self, company_id, partner_id, move_type, filter_never_user_accounts=False, limit=None, journal_id=None):
         """
         Returns the accounts ordered from most frequent to least frequent for a given partner
         and filtered according to the move type
@@ -758,6 +773,7 @@ class AccountAccount(models.Model):
         :param move_type: the type of the move to know which type of accounts to retrieve
         :param filter_never_user_accounts: True if we should filter out accounts never used for the partner
         :param limit: the maximum number of accounts to retrieve
+        :param journal_id: only return accounts allowed on this journal id
         :returns: List of account ids, ordered by frequency (from most to least frequent)
         """
         domain = [
@@ -766,6 +782,8 @@ class AccountAccount(models.Model):
             ('account_id.deprecated', '=', False),
             ('date', '>=', fields.Date.add(fields.Date.today(), days=-365 * 2)),
         ]
+        if journal_id:
+            domain += ['|', ('account_id.allowed_journal_ids', '=', journal_id), ('account_id.allowed_journal_ids', '=', False)]
         if move_type in self.env['account.move'].get_inbound_types(include_receipts=True):
             domain.append(('account_id.internal_group', '=', 'income'))
         elif move_type in self.env['account.move'].get_outbound_types(include_receipts=True):
@@ -795,8 +813,8 @@ class AccountAccount(models.Model):
         ))]
 
     @api.model
-    def _get_most_frequent_account_for_partner(self, company_id, partner_id, move_type=None):
-        most_frequent_account = self._get_most_frequent_accounts_for_partner(company_id, partner_id, move_type, filter_never_user_accounts=True, limit=1)
+    def _get_most_frequent_account_for_partner(self, company_id, partner_id, move_type=None, journal_id=None):
+        most_frequent_account = self._get_most_frequent_accounts_for_partner(company_id, partner_id, move_type, filter_never_user_accounts=True, limit=1, journal_id=journal_id)
         return most_frequent_account[0] if most_frequent_account else False
 
     @api.model
@@ -909,6 +927,7 @@ class AccountAccount(models.Model):
         '''
         if not self.ids:
             return None
+        self.env['account.move.line'].invalidate_model(['amount_residual', 'amount_residual_currency', 'reconciled'])
         query = """
             UPDATE account_move_line SET
                 reconciled = CASE WHEN debit = 0 AND credit = 0 AND amount_currency = 0
@@ -918,7 +937,6 @@ class AccountAccount(models.Model):
             WHERE full_reconcile_id IS NULL and account_id IN %s
         """
         self.env.cr.execute(query, [tuple(self.ids)])
-        self.env['account.move.line'].invalidate_model(['amount_residual', 'amount_residual_currency', 'reconciled'])
 
     def _toggle_reconcile_to_false(self):
         '''Toggle the `reconcile´ boolean from True -> False
@@ -937,6 +955,8 @@ class AccountAccount(models.Model):
         if partial_lines_count > 0:
             raise UserError(_('You cannot switch an account to prevent the reconciliation '
                               'if some partial reconciliations are still pending.'))
+
+        self.env['account.move.line'].invalidate_model(['amount_residual', 'amount_residual_currency'])
         query = """
             UPDATE account_move_line
                 SET amount_residual = 0, amount_residual_currency = 0
@@ -1009,7 +1029,10 @@ class AccountAccount(models.Model):
                 if self.env['account.move.line'].search_count([('account_id', '=', account.id), ('currency_id', 'not in', (False, vals['currency_id']))]):
                     raise UserError(_('You cannot set a currency on this account as it already has some journal entries having a different foreign currency.'))
 
-        res = super(AccountAccount, self.with_context(defer_account_code_checks=True)).write(vals)
+        if vals.get('deprecated') and self.env["account.tax.repartition.line"].search_count([('account_id', 'in', self.ids)], limit=1):
+            raise UserError(_("You cannot deprecate an account that is used in a tax distribution."))
+
+        res = super(AccountAccount, self.with_context(defer_account_code_checks=True, prefetch_fields=any(field in vals for field in ['code', 'account_type']))).write(vals)
 
         if not self.env.context.get('defer_account_code_checks') and {'company_ids', 'code', 'code_mapping_ids'} & vals.keys():
             self._ensure_code_is_unique()

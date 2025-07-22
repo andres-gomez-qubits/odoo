@@ -373,7 +373,8 @@ class PickingType(models.Model):
             }
             for p_date in dates:
                 date_category = self.env["stock.picking"].calculate_date_category(p_date)
-                summaries[picking_type_id]['total_' + date_category] += 1
+                if date_category:
+                    summaries[picking_type_id]['total_' + date_category] += 1
 
         self._prepare_graph_data(summaries)
 
@@ -948,18 +949,12 @@ class Picking(models.Model):
                 continue
             picking = picking.with_company(picking.company_id)
             if picking.picking_type_id:
-                # To be removed in 17.3+, as default location src/dest are now required.
-                location_dest, location_src = self.env['stock.warehouse']._get_partner_locations()
-                if picking.picking_type_id.default_location_src_id:
-                    location_src = picking.picking_type_id.default_location_src_id
+                location_src = picking.picking_type_id.default_location_src_id
                 if location_src.usage == 'supplier' and picking.partner_id:
                     location_src = picking.partner_id.property_stock_supplier
-
-                if picking.picking_type_id.default_location_dest_id:
-                    location_dest = picking.picking_type_id.default_location_dest_id
+                location_dest = picking.picking_type_id.default_location_dest_id
                 if location_dest.usage == 'customer' and picking.partner_id:
                     location_dest = picking.partner_id.property_stock_customer
-
                 picking.location_id = location_src.id
                 picking.location_dest_id = location_dest.id
 
@@ -1066,6 +1061,7 @@ class Picking(models.Model):
 
     @api.onchange('location_id')
     def _onchange_location_id(self):
+        (self.move_ids | self.move_ids_without_package).location_id =  self.location_id
         for move in self.move_ids.filtered(lambda m: m.move_orig_ids):
             for ml in move.move_line_ids:
                 parent_path = [int(loc_id) for loc_id in ml.location_id.parent_path.split('/')[:-1]]
@@ -1129,6 +1125,8 @@ class Picking(models.Model):
             for picking in self:
                 if picking.picking_type_id != picking_type:
                     picking.name = picking_type.sequence_id.next_by_id()
+                    vals['location_id'] = picking_type.default_location_src_id.id
+                    vals['location_dest_id'] = picking_type.default_location_dest_id.id
         res = super(Picking, self).write(vals)
         if vals.get('signature'):
             for picking in self:
@@ -1154,8 +1152,11 @@ class Picking(models.Model):
         return super(Picking, self).unlink()
 
     def do_print_picking(self):
+        picking_operations_report = self.env.ref('stock.action_report_picking',raise_if_not_found=False)
+        if not picking_operations_report:
+            raise UserError(_("The Picking Operations report has been deleted so you cannot print at this time unless the report is restored."))
         self.write({'printed': True})
-        return self.env.ref('stock.action_report_picking').report_action(self)
+        return picking_operations_report.report_action(self)
 
     def should_print_delivery_address(self):
         self.ensure_one()
@@ -1395,6 +1396,7 @@ class Picking(models.Model):
         self.package_level_ids.filtered(lambda p: not p.move_ids).unlink()
 
     def button_validate(self):
+        self = self.filtered(lambda p: p.state != 'done')
         draft_picking = self.filtered(lambda p: p.state == 'draft')
         draft_picking.action_confirm()
         for move in draft_picking.move_ids:
@@ -1553,6 +1555,19 @@ class Picking(models.Model):
         to_confirm = self.move_ids.filtered(lambda m: m.state == 'draft' and m.quantity)
         to_confirm._action_confirm()
 
+    def _get_moves_to_backorder(self):
+        self.ensure_one()
+        return self.move_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
+
+    def _create_backorder_picking(self):
+        self.ensure_one()
+        return self.copy({
+            'name': '/',
+            'move_ids': [],
+            'move_line_ids': [],
+            'backorder_id': self.id,
+        })
+
     def _create_backorder(self, backorder_moves=None):
         """ This method is called when the user chose to create a backorder. It will create a new
         picking, the backorder, and move the stock.moves that are not `done` or `cancel` into it.
@@ -1563,15 +1578,10 @@ class Picking(models.Model):
             if backorder_moves:
                 moves_to_backorder = backorder_moves.filtered(lambda m: m.picking_id == picking)
             else:
-                moves_to_backorder = picking.move_ids.filtered(lambda x: x.state not in ('done', 'cancel'))
+                moves_to_backorder = picking._get_moves_to_backorder()
             moves_to_backorder._recompute_state()
             if moves_to_backorder:
-                backorder_picking = picking.copy({
-                    'name': '/',
-                    'move_ids': [],
-                    'move_line_ids': [],
-                    'backorder_id': picking.id
-                })
+                backorder_picking = picking._create_backorder_picking()
                 moves_to_backorder.write({'picking_id': backorder_picking.id, 'picked': False})
                 moves_to_backorder.move_line_ids.package_level_id.write({'picking_id': backorder_picking.id})
                 moves_to_backorder.mapped('move_line_ids').write({'picking_id': backorder_picking.id})
@@ -1783,7 +1793,7 @@ class Picking(models.Model):
             'result_package_id': package.id,
         })
         if len(self) == 1:
-            self.env['stock.package_level'].create({
+            self.env['stock.package_level'].with_context(from_put_in_pack=True).create({
                 'package_id': package.id,
                 'picking_id': self.id,
                 'location_id': False,
@@ -1877,7 +1887,7 @@ class Picking(models.Model):
 
         The categories are based on current user's timezone (e.g. "today" will last
         between 00:00 and 23:59 local time). The datetime itself is assumed to be
-        in UTC. If the datetime is falsy, this function returns "none".
+        in UTC. If the datetime is falsy, this function returns "".
         """
         start_today = fields.Datetime.context_timestamp(
             self.env.user, fields.Datetime.now()
@@ -1888,7 +1898,7 @@ class Picking(models.Model):
         start_day_2 = start_today + timedelta(days=2)
         start_day_3 = start_today + timedelta(days=3)
 
-        date_category = "none"
+        date_category = ""
 
         if datetime:
             datetime = datetime.astimezone(pytz.UTC)

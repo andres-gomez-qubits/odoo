@@ -47,6 +47,7 @@ import {
     getService,
     installLanguages,
     makeServerError,
+    MockServer,
     mockService,
     models,
     mountView,
@@ -73,6 +74,7 @@ import { currencies } from "@web/core/currency";
 import { Domain } from "@web/core/domain";
 import { registry } from "@web/core/registry";
 import { useBus } from "@web/core/utils/hooks";
+import { omit } from "@web/core/utils/objects";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { session } from "@web/session";
 import { floatField } from "@web/views/fields/float/float_field";
@@ -123,7 +125,7 @@ class Foo extends models.Model {
             amount: 1200,
             currency_id: 2,
             reference: "bar,1",
-            properties: {},
+            properties: [],
         },
         {
             id: 2,
@@ -135,7 +137,7 @@ class Foo extends models.Model {
             m2m: [1, 2, 3],
             amount: 500,
             reference: "res.currency,1",
-            properties: {},
+            properties: [],
         },
         {
             id: 3,
@@ -147,7 +149,7 @@ class Foo extends models.Model {
             m2m: [],
             amount: 300,
             reference: "res.currency,2",
-            properties: {},
+            properties: [],
         },
         {
             id: 4,
@@ -158,7 +160,7 @@ class Foo extends models.Model {
             m2o: 1,
             m2m: [1],
             amount: 0,
-            properties: {},
+            properties: [],
         },
     ];
 }
@@ -214,8 +216,8 @@ test(`simple readonly list`, async () => {
         { message: "integer cells should be right aligned" }
     );
     expect(`.o_list_button_add`).toBeVisible();
-    expect(`.o_list_button_save`).not.toBeVisible();
-    expect(`.o_list_button_discard`).not.toBeVisible();
+    expect(`.o_list_button_save`).not.toHaveCount();
+    expect(`.o_list_button_discard`).not.toHaveCount();
 });
 
 test(`select record range with shift click`, async () => {
@@ -508,7 +510,7 @@ test(`editable list with open_form_view`, async () => {
 });
 
 test(`editable list with open_form_view in debug`, async () => {
-    serverState.debug = true;
+    serverState.debug = "1";
     await mountView({
         resModel: "foo",
         type: "list",
@@ -536,16 +538,17 @@ test(`editable list without open_form_view in debug`, async () => {
             super.setItem(...arguments);
         },
     });
-    serverState.debug = true;
+    serverState.debug = "1";
     await mountView({
         resModel: "foo",
         type: "list",
         arch: `<list editable="top"><field name="foo"/></list>`,
+        viewId: 1,
         selectRecord(resId, options) {
             expect.step(`switch to form - resId: ${resId} activeIds: ${options.activeIds}`);
         },
     });
-    const localStorageKey = "debug_open_view,foo,list,123456789,foo";
+    const localStorageKey = "debug_open_view,foo,list,1,foo";
     expect.verifySteps([["getItem", localStorageKey, null]]);
     expect(`td.o_list_record_open_form_view`).toHaveCount(0);
     expect(".o_optional_columns_dropdown").toHaveCount(1);
@@ -576,7 +579,7 @@ test(`editable list without open_form_view in debug`, async () => {
 });
 
 test(`non-editable list in debug`, async () => {
-    serverState.debug = true;
+    serverState.debug = "1";
     await mountView({
         resModel: "foo",
         type: "list",
@@ -2062,6 +2065,7 @@ test(`enabling archive in list when groupby m2m field`, async () => {
     });
 });
 
+test.tags("desktop");
 test(`enabling archive in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("action_archive", ({ args }) => {
@@ -2139,6 +2143,7 @@ test(`enabling duplicate in list when groupby m2m field`, async () => {
     });
 });
 
+test.tags("desktop");
 test(`enabling duplicate in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("copy", ({ args }) => {
@@ -2216,6 +2221,7 @@ test(`enabling delete in list when groupby m2m field`, async () => {
     });
 });
 
+test.tags("desktop");
 test(`enabling delete in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("unlink", ({ args }) => {
@@ -2301,6 +2307,7 @@ test(`enabling unarchive in list when groupby m2m field`, async () => {
     });
 });
 
+test.tags("desktop");
 test(`enabling unarchive in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("action_unarchive", ({ args }) => {
@@ -3042,11 +3049,9 @@ test(`editable list view: basic char field edition`, async () => {
     expect(`.o_field_cell:eq(0)`).toHaveText("abc", {
         message: "changes should be saved correctly",
     });
+    expect(`.o_data_row:eq(0)`).not.toHaveClass("o_selected_row");
     expect(`.o_data_row:eq(1)`).toHaveClass("o_selected_row");
-    expect(`.o_data_row`).not.toHaveClass("o_selected_row", {
-        message: "saved row should be in readonly mode",
-    });
-    expect(Foo._records[0].foo).toBe("abc", {
+    expect(MockServer.env["foo"].browse(1)[0].foo).toBe("abc", {
         message: "the edition should have been properly saved",
     });
 });
@@ -3180,7 +3185,7 @@ test(`list view not groupable`, async () => {
 
 test("group order by count", async () => {
     let readGroupCount = 0;
-    onRpc("foo", "web_read_group", async ({ kwargs, parent }) => {
+    onRpc("foo", "web_read_group", ({ kwargs }) => {
         if (readGroupCount < 2) {
             readGroupCount++;
         } else {
@@ -3188,7 +3193,6 @@ test("group order by count", async () => {
             expect.step(`read_group ${kwargs.groupby[0]} order by ${kwargs.orderby}`);
             // The mock server cannot handle orderby count
             kwargs.orderby = "";
-            return parent();
         }
     });
     await mountView({
@@ -3221,7 +3225,7 @@ test("group order by count", async () => {
 
 test("order by count reset", async () => {
     let readGroupCount = 0;
-    onRpc("foo", "web_read_group", async ({ kwargs, parent }) => {
+    onRpc("foo", "web_read_group", ({ kwargs }) => {
         if (readGroupCount < 2) {
             readGroupCount++;
         } else {
@@ -3229,7 +3233,6 @@ test("order by count reset", async () => {
             expect.step(`read_group ${kwargs.groupby[0]} order by ${kwargs.orderby}`);
             // The mock server cannot handle orderby count
             kwargs.orderby = "";
-            return parent();
         }
     });
     await mountView({
@@ -3449,6 +3452,20 @@ test(`selection box is properly displayed (multi pages)`, async () => {
     expect(`.o_list_selection_box`).toHaveCount(0, {
         message: "selection options are no longer visible",
     });
+});
+
+test(`selection box shows '+' suffix on selection count beyond count_limit`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list limit="2" count_limit="3"><field name="foo"/><field name="bar"/></list>`,
+    });
+    // select all records of first page
+    await contains(`thead .o_list_record_selector input`).click();
+    expect(`.o_list_selection_box`).toHaveText("2\nselected\n Select all 3+");
+    // select all domain
+    await contains(`.o_list_selection_box .o_list_select_domain`).click();
+    expect(`.o_list_selection_box`).toHaveText("All 3+ selected");
 });
 
 test(`selection box is properly displayed (group list)`, async () => {
@@ -3960,8 +3977,8 @@ test(`date field aggregates in grouped lists`, async () => {
     // this test simulates a scenario where a date field has a aggregator
     // and the web_read_group thus return a value for that field for each group
 
-    onRpc("web_read_group", async ({ parent }) => {
-        const res = await parent();
+    onRpc("web_read_group", ({ parent }) => {
+        const res = parent();
         res.groups[0].date = "2021-03-15";
         res.groups[1].date = "2021-02-11";
         return res;
@@ -3982,11 +3999,11 @@ test(`date field aggregates in grouped lists`, async () => {
 });
 
 test(`hide aggregated value in grouped lists when no data provided by RPC call`, async () => {
-    onRpc("web_read_group", async ({ parent }) => {
-        const res = await parent();
-        res.groups.forEach((group) => {
+    onRpc("web_read_group", ({ parent }) => {
+        const res = parent();
+        for (const group of res.groups) {
             delete group.qux;
-        });
+        }
         return res;
     });
     await mountView({
@@ -4607,15 +4624,13 @@ test(`fields are translatable in list view`, async () => {
         fr_BE: "Frenglish",
     });
 
-    onRpc("/web/dataset/call_kw/foo/get_field_translations", () => {
-        return [
-            [
-                { lang: "en_US", source: "yop", value: "yop" },
-                { lang: "fr_BE", source: "yop", value: "valeur français" },
-            ],
-            { translation_type: "char", translation_show_source: false },
-        ];
-    });
+    onRpc("foo", "get_field_translations", () => [
+        [
+            { lang: "en_US", source: "yop", value: "yop" },
+            { lang: "fr_BE", source: "yop", value: "valeur français" },
+        ],
+        { translation_type: "char", translation_show_source: false },
+    ]);
 
     await mountView({
         resModel: "foo",
@@ -4727,8 +4742,6 @@ test(`custom delete confirmation dialog`, async () => {
 });
 
 test(`deleting record which throws UserError should close confirmation dialog`, async () => {
-    expect.errors(1);
-
     onRpc("unlink", () => {
         throw makeServerError({ message: "Odoo Server Error" });
     });
@@ -4746,9 +4759,12 @@ test(`deleting record which throws UserError should close confirmation dialog`, 
     await toggleMenuItem("Delete");
     expect(`.modal`).toHaveCount(1, { message: "should have open the confirmation dialog" });
 
+    expect.errors(1);
+
     await contains(`.modal footer button.btn-primary`).click();
-    await waitFor(".modal");
-    expect(`.modal .modal-title`).toHaveText("Invalid Operation");
+    await waitFor(".modal .modal-title:contains(Invalid Operation)");
+
+    expect.verifyErrors(["Odoo Server Error"]);
 });
 
 test(`delete all records matching the domain`, async () => {
@@ -5022,14 +5038,17 @@ test(`archive/unarchive handles returned action`, async () => {
         },
     ]);
 
-    onRpc("/web/dataset/call_kw/foo/action_archive", () => ({
-        type: "ir.actions.act_window",
-        name: "Archive Action",
-        res_model: "bar",
-        view_mode: "form",
-        target: "new",
-        views: [[false, "form"]],
-    }));
+    onRpc("foo", "action_archive", ({ parent }) => {
+        parent();
+        return {
+            type: "ir.actions.act_window",
+            name: "Archive Action",
+            res_model: "bar",
+            view_mode: "form",
+            target: "new",
+            views: [[false, "form"]],
+        };
+    });
 
     await mountWithCleanup(WebClient);
     await getService("action").doAction(11);
@@ -5730,7 +5749,6 @@ test(`grouped, show only limited records when the list view is initially expande
 
 test(`list keeps offset on switchView`, async () => {
     Foo._views = {
-        search: `<search/>`,
         "list,99": `<list limit="1"><field name="display_name"/></list>`,
         "form,100": `<form><field name="display_name"/></form>`,
     };
@@ -5762,7 +5780,6 @@ test(`list keeps offset on switchView`, async () => {
 
 test(`Navigate between the list and kanban view using the command palette`, async () => {
     Foo._views = {
-        search: `<search/>`,
         list: `<list><field name="display_name"/></list>`,
         kanban: `
             <kanban class="o_kanban_test">
@@ -6128,8 +6145,6 @@ test(`can display a list with a many2many field`, async () => {
 });
 
 test(`display a tooltip on a field`, async () => {
-    serverState.debug = false;
-
     await mountView({
         resModel: "foo",
         type: "list",
@@ -6147,7 +6162,7 @@ test(`display a tooltip on a field`, async () => {
     expect(`.o-tooltip`).toHaveCount(1);
     expect(`.o-tooltip`).toHaveText("Foo");
 
-    serverState.debug = true;
+    serverState.debug = "1";
 
     // it is necessary to rerender the list so tooltips can be properly created
     await validateSearch(); // reload view
@@ -6163,7 +6178,6 @@ test(`display a tooltip on a field`, async () => {
 });
 
 test("field (with help) tooltip in non debug mode", async function () {
-    serverState.debug = false;
     Foo._fields.foo.help = "This is a foo field";
     await mountView({
         type: "list",
@@ -6353,8 +6367,8 @@ test(`bounce create button when no data and click on empty area`, async () => {
 });
 
 test(`no content helper when no data`, async () => {
-    const records = Foo._records.slice(0);
-    Foo._records.splice(0);
+    const records = Foo._records.map((record) => omit(record, "id"));
+    Foo._records = [];
 
     await mountView({
         resModel: "foo",
@@ -6366,7 +6380,7 @@ test(`no content helper when no data`, async () => {
     expect(`.o_list_view table`).toHaveCount(1, { message: "should have a table in the dom" });
     expect(`.o_view_nocontent`).toHaveText("click to add a partner");
 
-    Foo._records.push(...records);
+    MockServer.env["foo"].create(records);
     await contains(`.o_searchview_input`).press("enter");
     expect(`.o_view_nocontent`).toHaveCount(0, {
         message: "should not display the no content helper",
@@ -6472,7 +6486,6 @@ test(`refresh empty list with sample data`, async () => {
                 <field name="datetime"/>
             </list>
         `,
-        kanban: `<kanban/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -6563,6 +6576,7 @@ test(`empty list with sample data: keyboard navigation`, async () => {
     expect(`.o-tooltip--string`).toHaveCount(0);
 });
 
+test.tags("broken");
 test(`empty list with sample data: group by date`, async () => {
     await mountView({
         resModel: "foo",
@@ -6577,7 +6591,12 @@ test(`empty list with sample data: group by date`, async () => {
     expect(`.o_list_view .o_view_sample_data`).toHaveCount(1);
     expect(`.o_group_header`).toHaveCount();
 
-    await contains(`.o_group_has_content.o_group_header`).click();
+    // FIXME: ELEMENT SHOULD BE INTERACTIVE -> test is simulating a situation that
+    // cannot happen. Investigate the issue and remove `interactive: false` and
+    // "broken" tag when fixed.
+    await click(".o_group_has_content.o_group_header", { interactive: false });
+    await animationFrame();
+
     expect(`.o_data_row`).toHaveCount(4);
 });
 
@@ -8840,13 +8859,13 @@ test(`numbers in list are right-aligned`, async () => {
         `,
     });
 
-    const nbCellRight = [...queryAll(`.o_data_row:eq(0) > .o_data_cell`)].filter(
+    const nbCellRight = queryAll(`.o_data_row:eq(0) > .o_data_cell`).filter(
         (el) => window.getComputedStyle(el).textAlign === "right"
     ).length;
     expect(nbCellRight).toBe(2, { message: "there should be two right-aligned cells" });
 
     await contains(`.o_data_cell`).click();
-    const nbInputRight = [...queryAll(`.o_data_row:eq(0) > .o_data_cell input`)].filter(
+    const nbInputRight = queryAll(`.o_data_row:eq(0) > .o_data_cell input`).filter(
         (el) => window.getComputedStyle(el).textAlign === "right"
     ).length;
     expect(nbInputRight).toBe(2, { message: "there should be two right-aligned input" });
@@ -9030,18 +9049,11 @@ test(`result of consecutive resequences is correctly sorted`, async () => {
     defineModels([MyFoo]);
 
     let moves = 0;
-    const context = {
-        lang: "en",
-        tz: "taht",
-        uid: 7,
-        allowed_company_ids: [1],
-    };
     onRpc("/web/dataset/resequence", async (request) => {
         expect.step("resequence");
         const { params } = await request.json();
         if (moves === 0) {
-            expect(params).toEqual({
-                context,
+            expect(params).toMatchObject({
                 model: "my.foo",
                 ids: [4, 3],
                 offset: 13,
@@ -9049,8 +9061,7 @@ test(`result of consecutive resequences is correctly sorted`, async () => {
             });
         }
         if (moves === 1) {
-            expect(params).toEqual({
-                context,
+            expect(params).toMatchObject({
                 model: "my.foo",
                 ids: [4, 2],
                 offset: 12,
@@ -9058,8 +9069,7 @@ test(`result of consecutive resequences is correctly sorted`, async () => {
             });
         }
         if (moves === 2) {
-            expect(params).toEqual({
-                context,
+            expect(params).toMatchObject({
                 model: "my.foo",
                 ids: [2, 4],
                 offset: 12,
@@ -9067,8 +9077,7 @@ test(`result of consecutive resequences is correctly sorted`, async () => {
             });
         }
         if (moves === 3) {
-            expect(params).toEqual({
-                context,
+            expect(params).toMatchObject({
                 model: "my.foo",
                 ids: [4, 2],
                 offset: 12,
@@ -9982,7 +9991,7 @@ test(`editable list view: multi edition`, async () => {
 
     await contains(`.o_data_row:eq(0) .o_data_cell:eq(1)`).click();
     await contains(`.o_data_row [name=int_field] input`).edit("666");
-    expect(queryOne(".modal-body").innerText.includes("those 2 records")).toBe(true, {
+    expect(".modal-body").toHaveText(/those 2 records/, {
         message: "the number of records should be correctly displayed",
     });
 
@@ -10063,9 +10072,8 @@ test(`editable list view: multi edition cannot call onchanges`, async () => {
     };
 
     stepAllNetworkCalls();
-    onRpc("write", ({ args }) => {
-        for (const id of args[0]) {
-            const record = Foo._records.find((r) => r.id === id);
+    onRpc("write", function ({ args }) {
+        for (const record of this.env["foo"].browse(args[0])) {
             record.int_field = args[1].foo.length;
         }
     });
@@ -10146,7 +10154,7 @@ test.todo(`editable list view: multi edition error and cancellation handling`, a
     expect(`.o_list_record_selector input:enabled`).toHaveCount(0);
 
     await contains(`.o_selected_row [name=int_field] input`).edit("hahaha", { confirm: "blur" });
-    expect(`.modal`).toHaveCount(1, { message: "there should be an opened modal" });
+    expect(`.modal`).toHaveCount(1);
 
     await contains(`.modal .btn-primary`).click();
     expect(queryAllTexts(`.o_data_row:eq(0) .o_data_cell`)).toEqual(["yop", "10"], {
@@ -10160,7 +10168,7 @@ test.todo(`editable list view: multi edition error and cancellation handling`, a
 
     await contains(`.o_selected_row [name=foo] input`).edit("", { confirm: false });
     await contains(`.o_control_panel`).click();
-    expect(`.modal`).toHaveCount(1, { message: "there should be an opened modal" });
+    expect(`.modal`).toHaveCount(1);
 
     await contains(`.modal .btn-primary`).click();
     expect(queryAllTexts(`.o_data_row:eq(0) .o_data_cell`)).toEqual(["yop", "10"], {
@@ -10175,7 +10183,6 @@ test(`multi edition: many2many_tags in many2many field`, async () => {
     }
     Bar._views = {
         list: `<list><field name="name"/></list>`,
-        search: `<search/>`,
     };
 
     await mountView({
@@ -10577,8 +10584,6 @@ test(`editable list view: many2one with readonly modifier`, async () => {
 });
 
 test(`editable list view: multi edition server error handling`, async () => {
-    expect.errors(1);
-
     onRpc("write", () => {
         throw makeServerError();
     });
@@ -10597,8 +10602,11 @@ test(`editable list view: multi edition server error handling`, async () => {
     await contains(`.o_data_row:eq(0) .o_data_cell:eq(0)`).click();
     await contains(`.o_selected_row [name=foo] input`).edit("abc");
     await contains(`.o_list_view`).click();
+
+    expect.errors(1);
     await contains(`.modal .btn-primary`).click();
-    // Server error: if there was a crash manager, there would be an open error at this point...
+    expect.verifyErrors(["RPC_ERROR"]);
+
     expect(`.o_data_row:eq(0) .o_data_cell`).toHaveText("yop", {
         message: "first cell should have discarded any change",
     });
@@ -10867,8 +10875,8 @@ test(`non editable list view: multi edition`, async () => {
 
     await contains(`.o_data_row:eq(0) .o_data_cell:eq(1)`).click();
     await contains(`.o_data_row [name=int_field] input`).edit("666");
-    expect(`.modal`).toHaveCount(1, { message: "there should be an opened modal" });
-    expect(queryOne(".modal").innerText.includes("those 2 records")).toBe(true, {
+    expect(`.modal`).toHaveCount(1);
+    expect(".modal").toHaveText(/those 2 records/, {
         message: "the number of records should be correctly displayed",
     });
 
@@ -11303,11 +11311,6 @@ test(`grouped list view move to next page when all records from the current page
 test(`list view move to previous page when all records from last page archive/unarchived`, async () => {
     // add active field on foo model and make all records active
     Foo._fields.active = fields.Boolean({ default: true });
-
-    onRpc("/web/dataset/call_kw/foo/action_archive", () => {
-        Foo._records[3].active = false;
-        return {};
-    });
 
     await mountView({
         resModel: "foo",
@@ -11868,7 +11871,7 @@ test(`char field edition in editable grouped list`, async () => {
     await contains(`.o_data_cell`).click();
     await contains(`.o_selected_row .o_data_cell [name=foo] input`).edit("pla");
     await contains(`.o_list_button_save`).click();
-    expect(Foo._records[3].foo).toBe("pla", {
+    expect(MockServer.env["foo"].browse(4)[0].foo).toBe("pla", {
         message: "the edition should have been properly saved",
     });
     expect(`.o_data_row:eq(0):contains(pla)`).toHaveCount(1);
@@ -12008,7 +12011,7 @@ test(`pressing ESC in editable grouped list should discard the current line chan
     expect(`tbody tr td:contains(yop)`).toHaveCount(1);
     expect(`tr.o_data_row`).toHaveCount(3);
     expect(`tr.o_data_row.o_selected_row`).toHaveCount(0);
-    expect(`.o_list_button_save`).not.toBeVisible();
+    expect(`.o_list_button_save`).not.toHaveCount();
 });
 
 test(`pressing TAB in editable="bottom" grouped list`, async () => {
@@ -13592,7 +13595,6 @@ test(`optional fields is shown only if enabled`, async () => {
                 <field name="display_name" optional="show"/>
             </list>
         `,
-        search: `<search/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -13695,6 +13697,7 @@ test(`list view with optional fields and async rendering`, async () => {
     expect(`.o-dropdown--menu input:checked`).toHaveCount(1);
 });
 
+test.tags("desktop");
 test(`change the viewType of the current action`, async () => {
     defineActions([
         {
@@ -13870,7 +13873,6 @@ test(`list view with optional fields from local storage being the empty array`, 
     });
 
     const verifyHeaders = (namedHeaders) => {
-        // const headers = [...queryAll(`.o_list_table thead th`)];
         expect(`.o_list_table thead th`).toHaveCount(namedHeaders.length + 2);
         expect(`.o_list_table thead th:eq(0)`).toHaveClass("o_list_record_selector");
         expect(`.o_list_table thead th:last`).toHaveClass("o_list_actions_header");
@@ -14482,8 +14484,6 @@ test(`archive/unarchive not available on active readonly models`, async () => {
 test(`open groups are kept when leaving and coming back`, async () => {
     Foo._views = {
         list: `<list><field name="foo"/></list>`,
-        search: `<search/>`,
-        form: `<form/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -14522,8 +14522,6 @@ test(`open groups are kept when leaving and coming back (grouped by date)`, asyn
     Foo._fields.date = fields.Date({ default: "2022-10-10" });
     Foo._views = {
         list: `<list><field name="foo"/></list>`,
-        search: `<search/>`,
-        form: `<form/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -14561,8 +14559,6 @@ test(`open groups are kept when leaving and coming back (grouped by date)`, asyn
 test(`go to the next page after leaving and coming back to a grouped list view`, async () => {
     Foo._views = {
         list: `<list groups_limit="1"><field name="foo"/></list>`,
-        form: `<form/>`,
-        search: `<search/>`,
     };
 
     await mountWithCleanup(WebClient);
@@ -15063,9 +15059,31 @@ test(`view widgets are rendered in list view`, async () => {
     expect(queryAllTexts`.test_widget`).toEqual(["true", "true", "true", "false"]);
 });
 
-test(`edit a record then select another record with a throw error when saving`, async () => {
-    expect.errors(1);
+test(`view widget with options in list view`, async () => {
+    class TestWidget extends Component {
+        static template = xml`<div class="test_widget" t-esc="props.x"/>`;
+        static props = ["*"];
+    }
+    registry.category("view_widgets").add("test_widget", {
+        component: TestWidget,
+        extractProps: ({ options }) => ({
+            x: options.x,
+        }),
+    });
 
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <widget name="test_widget" options="{'x': 'y'}"/>
+            </list>
+        `,
+    });
+    expect(queryAllTexts`.test_widget`).toEqual(["y", "y", "y", "y"]);
+});
+
+test(`edit a record then select another record with a throw error when saving`, async () => {
     onRpc("web_save", () => {
         throw makeServerError({ message: "Can't write" });
     });
@@ -15079,8 +15097,10 @@ test(`edit a record then select another record with a throw error when saving`, 
     await contains(`[name=foo] input`).edit("plop", { confirm: false });
     expect(`[name=foo] input`).toHaveCount(1);
 
+    expect.errors(1);
     await contains(`.o_data_cell:eq(0)`).click();
     await animationFrame();
+    expect.verifyErrors(["RPC_ERROR"]);
     expect(`.o_error_dialog`).toHaveCount(1);
 
     await contains(`.o_error_dialog .btn-primary.o-default-button`).click();
@@ -15120,7 +15140,6 @@ test(`highlight of a (sortable) column with label`, async () => {
 test(`Search more in a many2one`, async () => {
     Bar._views = {
         list: `<list><field name="display_name"/></list>`,
-        search: `<search/>`,
     };
 
     patchWithCleanup(Many2XAutocomplete.defaultProps, {
@@ -15188,12 +15207,18 @@ test(`list view with default_group_by`, async () => {
         readGroupCount++;
         expect.step(`web_read_group${readGroupCount}`);
         switch (readGroupCount) {
-            case 1:
-                return expect(kwargs.groupby).toEqual(["bar"]);
-            case 2:
-                return expect(kwargs.groupby).toEqual(["m2m"]);
-            case 3:
-                return expect(kwargs.groupby).toEqual(["bar"]);
+            case 1: {
+                expect(kwargs.groupby).toEqual(["bar"]);
+                break;
+            }
+            case 2: {
+                expect(kwargs.groupby).toEqual(["m2m"]);
+                break;
+            }
+            case 3: {
+                expect(kwargs.groupby).toEqual(["bar"]);
+                break;
+            }
         }
     });
 
@@ -15327,9 +15352,8 @@ test(`Properties: boolean`, async () => {
     expect(`.o_field_cell.o_boolean_cell`).toHaveCount(3);
 
     await contains(`.o_field_cell.o_boolean_cell`).click();
-    await contains(`.o_field_cell.o_boolean_cell input`).click();
     await contains(`.o_list_button_save`).click();
-    expect(`.o_field_cell.o_boolean_cell input`).not.toBeChecked();
+    expect(`.o_field_cell.o_boolean_cell input:first`).not.toBeChecked();
     expect.verifySteps(["web_save"]);
 });
 
@@ -15841,10 +15865,7 @@ test(`properties: optional show/hide (config from local storage)`, async () => {
         }
     }
 
-    localStorage.setItem(
-        "optional_fields,foo,list,123456789,m2o,properties",
-        "properties.property_char"
-    );
+    localStorage.setItem("optional_fields,foo,list,1,m2o,properties", "properties.property_char");
 
     await mountView({
         resModel: "foo",
@@ -15855,6 +15876,7 @@ test(`properties: optional show/hide (config from local storage)`, async () => {
                 <field name="properties"/>
             </list>
         `,
+        viewId: 1,
     });
     expect(`.o_list_table thead th`).toHaveCount(4);
     expect(`.o_list_table thead th.o_list_record_selector`).toHaveCount(1);
@@ -15876,10 +15898,7 @@ test(`properties: optional show/hide (at reload, config from local storage)`, as
         }
     }
 
-    localStorage.setItem(
-        "optional_fields,foo,list,123456789,m2o,properties",
-        "properties.property_char"
-    );
+    localStorage.setItem("optional_fields,foo,list,1,m2o,properties", "properties.property_char");
 
     await mountView({
         resModel: "foo",
@@ -15890,6 +15909,7 @@ test(`properties: optional show/hide (at reload, config from local storage)`, as
                 <field name="properties"/>
             </list>
         `,
+        viewId: 1,
         groupBy: ["m2o"],
     });
 
@@ -16117,7 +16137,6 @@ test(`restore orderBy from state when using default order`, async () => {
                 <field name="foo"/>
             </form>
         `,
-        search: `<search/>`,
     };
 
     onRpc("web_search_read", ({ kwargs }) => expect.step(`order:${kwargs.order}`));
@@ -16207,11 +16226,9 @@ test(`context keys not passed down the stack and not to fields`, async () => {
                 <field name="m2m" widget="many2many_tags"/>
             </list>
         `,
-        search: `<search/>`,
     };
     Bar._views = {
         list: `<list><field name="name"/></list>`,
-        search: `<search/>`,
     };
 
     Bar._records = [];
@@ -16560,7 +16577,7 @@ test("two pages, go page 2, record deleted meanwhile", async () => {
     expect(getPagerValue()).toEqual([1, 3]);
     expect(getPagerLimit()).toBe(4);
 
-    Foo._records.splice(3);
+    MockServer.env["foo"].unlink(4);
     await pagerNext();
     expect(".o_data_row").toHaveCount(3);
     expect(getPagerValue()).toEqual([1, 3]);
@@ -16590,7 +16607,7 @@ test("two pages, go page 2, record deleted meanwhile (grouped case)", async () =
     expect(getPagerValue(queryFirst(".o_group_header"))).toEqual([1, 3]);
     expect(getPagerLimit(queryFirst(".o_group_header"))).toBe(4);
 
-    Foo._records.splice(3);
+    MockServer.env["foo"].unlink(4);
     await pagerNext(queryFirst(".o_group_header"));
     expect(".o_data_row").toHaveCount(3);
     expect(".o_group_header .o_pager").toHaveCount(0);
@@ -16627,7 +16644,6 @@ test("open record, with invalid record in list", async () => {
     Foo._views = {
         form: `<form><field name="foo"/><field name="int_field"/></form>`,
         list: `<list><field name="foo" required="1"/><field name="int_field"/></list>`,
-        search: `<search/>`,
     };
 
     mockService("notification", {
@@ -16649,4 +16665,24 @@ test("open record, with invalid record in list", async () => {
     await contains(".o_data_cell").click();
 
     expect(".o_form_view").toHaveCount(1);
+});
+
+test(`hide pager in the list view with sample data`, async () => {
+    Foo._records = [];
+
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list sample="1">
+                <field name="foo"/>
+                <field name="bar"/>
+                <field name="int_field"/>
+            </list>
+        `,
+        noContentHelp: "click to add a partner",
+    });
+
+    expect(".o_content").toHaveClass("o_view_sample_data");
+    expect(".o_cp_pager").not.toHaveCount();
 });

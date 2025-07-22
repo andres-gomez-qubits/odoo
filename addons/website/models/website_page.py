@@ -63,6 +63,16 @@ class Page(models.Model):
         for page in self:
             page.website_url = page.url
 
+    @api.depends_context('uid')
+    def _compute_can_publish(self):
+        if self.env.user.has_group('website.group_website_designer'):
+            for record in self:
+                record.can_publish = True
+        # FIXME this makes it so no-rights internal users *see* the publish
+        # button for website pages (although they cannot use it)
+        else:
+            super()._compute_can_publish()
+
     def _get_most_specific_pages(self):
         ''' Returns the most specific pages in self. '''
         ids = []

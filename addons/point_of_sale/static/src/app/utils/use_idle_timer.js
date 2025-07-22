@@ -1,15 +1,6 @@
 import { useExternalListener, useState } from "@odoo/owl";
 
-const UserPresenceEvents = [
-    "mousemove",
-    "mousedown",
-    "touchstart",
-    "touchend",
-    "touchmove",
-    "click",
-    "scroll",
-    "keypress",
-];
+const UserPresenceEvents = ["mousemove", "mousedown", "touchmove", "click", "scroll", "keypress"];
 
 export function useIdleTimer(steps, onAlive) {
     const state = useState({
@@ -20,17 +11,15 @@ export function useIdleTimer(steps, onAlive) {
 
     const checkSteps = () => {
         for (const step of steps) {
-            if (step.timeout === state.time * 1000) {
-                state.idle = true;
-                step.action();
+            if (step.timeout === state.time * 1000 && !state.idle) {
+                state.idle = step.action();
             }
         }
     };
 
-    const onMove = () => {
+    const onMove = (ev) => {
         if (state.idle) {
-            state.idle = false;
-            onAlive();
+            state.idle = onAlive(ev);
         }
         state.time = 0;
     };

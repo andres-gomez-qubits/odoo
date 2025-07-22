@@ -6,16 +6,16 @@
 # Paweł Wodyński <pw@myodoo.pl>, 2024
 # Tiffany Chang, 2024
 # Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2024
-# Marta Wacławek, 2025
 # Wil Odoo, 2025
+# Marta Wacławek, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-10 13:23+0000\n"
+"POT-Creation-Date: 2025-05-14 20:47+0000\n"
 "PO-Revision-Date: 2024-09-29 00:00+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Marta Wacławek, 2025\n"
 "Language-Team: Polish (https://app.transifex.com/odoo/teams/41243/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -98,13 +98,13 @@ msgstr "AI"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 msgid "AI Copywriter"
-msgstr ""
+msgstr "Copywriter AI"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 msgid "AI Tools"
-msgstr ""
+msgstr "Narzędzia AI"
 
 #. module: html_editor
 #. odoo-javascript
@@ -209,7 +209,7 @@ msgstr "Wszystkie obrazki zostały załadowane"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.js:0
 msgid "An error occurred while fetching the entered URL."
-msgstr ""
+msgstr "Wystąpił błąd podczas pobierania podanego adresu URL."
 
 #. module: html_editor
 #. odoo-javascript
@@ -280,27 +280,31 @@ msgstr "Banner"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Danger"
-msgstr ""
+msgstr "Banner niebezpieczeństwo"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Info"
-msgstr ""
+msgstr "Banner informacje"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Success"
-msgstr ""
+msgstr "Banner powodzenie"
 
 #. module: html_editor
 #. odoo-javascript
+#: code:addons/html_editor/static/src/html_migrations/migration-1.2.js:0
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Banner Warning"
-msgstr ""
+msgstr "Banner ostrzeżenie"
 
 #. module: html_editor
 #. odoo-javascript
@@ -330,13 +334,13 @@ msgstr "Przycisk"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Button Primary"
-msgstr ""
+msgstr "Przycisk podstawowy"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.js:0
 msgid "Button Secondary"
-msgstr ""
+msgstr "Przycisk dodatkowy"
 
 #. module: html_editor
 #. odoo-javascript
@@ -356,7 +360,7 @@ msgstr "Zmień opis mediów i etykietkę narzędzi"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 msgid "ChatGPT"
-msgstr ""
+msgstr "ChatGPT"
 
 #. module: html_editor
 #. odoo-javascript
@@ -369,12 +373,6 @@ msgstr "Lista kontrolna"
 #: code:addons/html_editor/static/src/others/x2many_image_field.xml:0
 msgid "Clear"
 msgstr "Wyczyść"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/backend/excalidraw/excalidraw.xml:0
-msgid "Click here to update the source"
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -393,14 +391,6 @@ msgstr "Kod"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/fields/html_field.js:0
 msgid "Code view"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Collaborative Links require joining, while Embed Links directly show the "
-"drawing."
 msgstr ""
 
 #. module: html_editor
@@ -425,7 +415,7 @@ msgstr "Zawartość"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_dialog.js:0
 msgid "Content generated"
-msgstr ""
+msgstr "Wygenerowana treść"
 
 #. module: html_editor
 #. odoo-javascript
@@ -473,7 +463,7 @@ msgstr "Popraw"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/upload_progress_toast/upload_service.js:0
 msgid "Could not load the file \"%s\"."
-msgstr ""
+msgstr "Nie można załadować pliku \"%s\"."
 
 #. module: html_editor
 #. odoo-javascript
@@ -497,7 +487,7 @@ msgstr "Utwórz URL"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/image_crop_plugin.js:0
 msgid "Crop image"
-msgstr ""
+msgstr "Przytnij obrazek"
 
 #. module: html_editor
 #. odoo-javascript
@@ -542,7 +532,6 @@ msgstr "Opis"
 #: code:addons/html_editor/static/src/main/media/image_crop.xml:0
 #: code:addons/html_editor/static/src/main/media/image_description.xml:0
 #: code:addons/html_editor/static/src/main/media/media_dialog/media_dialog.xml:0
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
 msgid "Discard"
 msgstr "Odrzuć"
 
@@ -553,6 +542,8 @@ msgid ""
 "Discover a world of awesomeness in our copyright-free image haven. No legal "
 "drama, just nice images!"
 msgstr ""
+"Odkryj świat niesamowitych obrazów w naszej bibliotece obrazów bez praw "
+"autorskich. Zero problemów prawnych, po prostu świetne zdjęcia!"
 
 #. module: html_editor
 #. odoo-javascript
@@ -560,12 +551,6 @@ msgstr ""
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_media_dialog.js:0
 msgid "Documents"
 msgstr "Dokumenty"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Drawing Board"
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -753,25 +738,25 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
 msgid "Generate Text with AI"
-msgstr ""
+msgstr "Wygeneruj text z użyciem AI"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 msgid "Generate or transform content with AI."
-msgstr ""
+msgstr "Generuj lub przekształcaj treści z użyciem AI."
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 msgid "Generating"
-msgstr ""
+msgstr "Generowanie"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 msgid "Generating an alternative..."
-msgstr ""
+msgstr "Generuję alternatywę..."
 
 #. module: html_editor
 #. odoo-javascript
@@ -789,7 +774,7 @@ msgstr "Nagłówek 1"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/font_plugin.js:0
 msgid "Header 1 Display 1"
-msgstr ""
+msgstr "Nagłówek 1 Ekran 1"
 
 #. module: html_editor
 #. odoo-javascript
@@ -990,12 +975,6 @@ msgstr "Wstaw"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert Drawing"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/plugins/video_plugin/video_selector_dialog/video_selector_dialog.xml:0
 msgid "Insert Video"
 msgstr "Wstaw film "
@@ -1010,13 +989,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert a danger banner"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "Insert a drawing board"
-msgstr ""
+msgstr "Wklej banner ostrzegawczy"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1052,7 +1025,7 @@ msgstr "Wstaw ocenę powyżej 5 gwiazdek"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert a success banner"
-msgstr ""
+msgstr "Wstaw banner powodzenia"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1064,7 +1037,7 @@ msgstr "Wstaw tabelę"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert a warning banner"
-msgstr ""
+msgstr "Wstaw banner ostrzegawczy"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1074,15 +1047,9 @@ msgstr "Wstaw powyżej"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_plugin.js:0
-msgid "Insert an Excalidraw Board"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/banner_plugin.js:0
 msgid "Insert an info banner"
-msgstr ""
+msgstr "Wstaw banner informacyjny"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1304,7 +1271,7 @@ msgstr "Lista numerowana"
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Oops, it looks like our AI is unreachable!"
-msgstr ""
+msgstr "Ups, wygląda na to, że nasze AI jest teraz niedostępne!"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1321,12 +1288,6 @@ msgstr ""
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Open in a new tab"
 msgstr "Otwórz w nowej karcie"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Open in new Window"
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -1477,7 +1438,7 @@ msgstr "Zresetuj Obraz"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/table/table_menu.js:0
 msgid "Reset Size"
-msgstr ""
+msgstr "Zresetuj rozmiar"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1636,23 +1597,11 @@ msgid "Solid"
 msgstr "Solidny"
 
 #. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "Something went wrong!"
-msgstr "Coś poszło nie tak!"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid ""
-"Sorry, we could not find your drawing, please verify that the URL is valid."
-msgstr ""
-
-#. module: html_editor
 #. odoo-python
 #: code:addons/html_editor/controllers/main.py:0
 msgid "Sorry, we could not generate a response. Please try again later."
 msgstr ""
+"Przepraszamy, nie mogliśmy wygenerować odpowiedzi. Spróbuj ponownie później."
 
 #. module: html_editor
 #. odoo-python
@@ -1664,7 +1613,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/star_plugin.js:0
 msgid "Stars"
-msgstr ""
+msgstr "Gwiazdy"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1710,12 +1659,6 @@ msgstr "Tekst"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/core/excalidraw/readonly_excalidraw.xml:0
-msgid "The Excalidraw URL is not valid."
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
 msgid "The URL does not seem to work."
 msgstr "Adres URL wydaje się nie działać."
@@ -1748,7 +1691,7 @@ msgstr "Podany adres URL jest nieprawidłowy"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_prompt_dialog.xml:0
 msgid "Thinking..."
-msgstr ""
+msgstr "Myślę..."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1843,13 +1786,13 @@ msgstr "Przetłumacz"
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_plugin.js:0
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
 msgid "Translate with AI"
-msgstr ""
+msgstr "Przetłumacz z użyciem AI"
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_translate_dialog.xml:0
 msgid "Translating..."
-msgstr ""
+msgstr "Tłumaczę..."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1873,7 +1816,7 @@ msgstr "Wpisz \"/\" dla poleceń"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/link/link_popover.xml:0
 msgid "Type your URL"
-msgstr ""
+msgstr "Wpisz swój URL"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1940,7 +1883,7 @@ msgstr "Kod wideo"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/video/video.xml:0
 msgid "Video player"
-msgstr ""
+msgstr "Odtwarzacz wideo"
 
 #. module: html_editor
 #. odoo-javascript
@@ -1973,6 +1916,7 @@ msgid ""
 "Wow, it feels a bit empty in here. Upload from the button in the top right "
 "corner!"
 msgstr ""
+"Trochę tutaj pusto! Prześlij coś przy użyciu przycisku w prawym górnym rogu."
 
 #. module: html_editor
 #. odoo-javascript
@@ -1997,6 +1941,8 @@ msgid ""
 "You have reached the maximum number of requests for this service. Try again "
 "later."
 msgstr ""
+"Osiągnąłeś maksymalną ilość zapytań dla tej usługi, spróbuj ponownie "
+"później."
 
 #. module: html_editor
 #. odoo-javascript
@@ -2023,13 +1969,13 @@ msgstr "Youku"
 #. odoo-javascript
 #: code:addons/html_editor/static/src/others/embedded_components/core/video/video.xml:0
 msgid "Your browser does not support iframe."
-msgstr ""
+msgstr "Twoja przeglądarka nie obsługuje iframe."
 
 #. module: html_editor
 #. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_dialog.js:0
 msgid "Your content was successfully generated."
-msgstr ""
+msgstr "Twoja treść została wygenerowana pomyślnie."
 
 #. module: html_editor
 #. odoo-javascript
@@ -2051,15 +1997,9 @@ msgstr "Oddalenie"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "all"
-msgstr "wszystko"
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/chatgpt/chatgpt_alternatives_dialog.xml:0
 msgid "alternatives..."
-msgstr ""
+msgstr "alternatywy..."
 
 #. module: html_editor
 #. odoo-javascript
@@ -2069,15 +2009,9 @@ msgstr "i"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "database"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/font/gradient_picker.xml:0
 msgid "deg"
-msgstr ""
+msgstr "deg"
 
 #. module: html_editor
 #. odoo-javascript
@@ -2087,21 +2021,9 @@ msgstr "dokument"
 
 #. module: html_editor
 #. odoo-javascript
-#: code:addons/html_editor/static/src/others/embedded_components/plugins/excalidraw_plugin/excalidraw_dialog/excalidraw_dialog.xml:0
-msgid "e.g. https://link.excalidraw.com/..."
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
 #: code:addons/html_editor/static/src/main/media/file_plugin.js:0
 msgid "file"
 msgstr "plik"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/media/media_dialog/file_selector.xml:0
-msgid "media-library"
-msgstr ""
 
 #. module: html_editor
 #. odoo-javascript
@@ -2114,21 +2036,3 @@ msgstr "lub"
 #: code:addons/html_editor/static/src/main/media/media_dialog/video_selector.xml:0
 msgid "videos"
 msgstr "filmy wideo"
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlDescription}}"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.urlTitle}}"
-msgstr ""
-
-#. module: html_editor
-#. odoo-javascript
-#: code:addons/html_editor/static/src/main/link/link_popover.xml:0
-msgid "{{state.url}}"
-msgstr ""

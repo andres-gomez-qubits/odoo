@@ -3,6 +3,7 @@ import {
     bootstrapToTable,
     cardToTable,
     classToStyle,
+    createMso,
     formatTables,
     getCSSRules,
     listGroupToTable,
@@ -10,6 +11,7 @@ import {
     normalizeRem,
 } from "@mail/views/web/fields/html_mail_field/convert_inline";
 import { afterEach, beforeEach, describe, expect, getFixture, test } from "@odoo/hoot";
+import { enableTransitions } from "@odoo/hoot-mock";
 import {
     getGridHtml,
     getRegularGridHtml,
@@ -859,6 +861,7 @@ describe("Convert classes to inline styles", () => {
     });
 
     test("convert Bootstrap classes to inline styles", async () => {
+        enableTransitions();
         editable.innerHTML = `
             <div class="container"><div class="row"><div class="col">Hello</div></div></div>`;
         getFixture().append(editable); // editable needs to be in the DOM to compute its dynamic styles.
@@ -1417,5 +1420,26 @@ describe("Convert classes to inline styles", () => {
         );
 
         // @todo to adapt when hoot has a better way to remove it
+    });
+});
+
+describe("Properly add MSO conditions", () => {
+    test("Create mso properly", async () => {
+        expect(createMso("<div>abcde</div>").nodeValue).toEqual(
+            `[if mso]><div>abcde</div><![endif]`,
+            { message: "Should wrap the content in mso condition" }
+        );
+
+        expect(
+            createMso("<div>ef<!--[if mso]><div>abcd</div><![endif]-->gh</div>").nodeValue
+        ).toEqual(`[if mso]><div>ef<div>abcd</div>gh</div><![endif]`, {
+            message: "Should wrap the content inside one mso condition",
+        });
+
+        expect(
+            createMso("<div>ef<!--[if !mso]><div>abcd</div><![endif]-->gh</div>").nodeValue
+        ).toEqual(`[if mso]><div>efgh</div><![endif]`, {
+            message: "Should remove nested mso hide condition",
+        });
     });
 });

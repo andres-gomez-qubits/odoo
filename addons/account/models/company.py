@@ -11,6 +11,7 @@ from odoo.tools import date_utils, format_list, SQL
 from odoo.tools.mail import is_html_empty
 from odoo.tools.misc import format_date
 from odoo.addons.account.models.account_move import MAX_HASH_VERSION
+from odoo.addons.account.models.partner import _ref_company_registry
 from odoo.addons.base_vat.models.res_partner import _ref_vat
 
 
@@ -36,6 +37,12 @@ PEPPOL_DEFAULT_COUNTRIES = [
     'FR', 'GR', 'IE', 'IS', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL',
     'NO', 'PL', 'PT', 'RO', 'SE', 'SI',
 ]
+
+# List of countries where Peppol footnote will be added when sending by mail.
+PEPPOL_MAILING_COUNTRIES = [
+    'BE', 'LU', 'NL', 'SE', 'NO',
+]
+
 # List of countries where Peppol is accessible.
 PEPPOL_LIST = PEPPOL_DEFAULT_COUNTRIES + [
     'AD', 'AL',  'BA', 'BG', 'GB', 'HR', 'HU', 'LI', 'MC', 'ME',
@@ -261,6 +268,7 @@ class ResCompany(models.Model):
         help="Default on whether the sales price used on the product and invoices with this Company includes its taxes."
     )
     company_vat_placeholder = fields.Char(compute='_compute_company_vat_placeholder')
+    company_registry_placeholder = fields.Char(compute='_compute_company_registry_placeholder')
 
     def get_next_batch_payment_communication(self):
         '''
@@ -388,7 +396,10 @@ class ResCompany(models.Model):
     @api.depends('hard_lock_date')
     def _compute_user_hard_lock_date(self):
         for company in self:
-            company.user_hard_lock_date = max(c.hard_lock_date or date.min for c in company.sudo().parent_ids)
+            company.user_hard_lock_date = max(
+                c.hard_lock_date or date.min
+                for c in company.with_context(active_test=False).sudo().parent_ids
+            )
 
     def _initiate_account_onboardings(self):
         account_onboarding_routes = [
@@ -888,7 +899,7 @@ class ResCompany(models.Model):
     def _existing_accounting(self) -> bool:
         """Return True iff some accounting entries have already been made for the current company."""
         self.ensure_one()
-        return bool(self.env['account.move.line'].search([('company_id', 'child_of', self.id)], limit=1))
+        return bool(self.env['account.move.line'].sudo().search_count([('company_id', 'child_of', self.id)], limit=1))
 
     def _chart_template_selection(self):
         return self.env['account.chart.template']._select_chart_template(self.country_id)
@@ -1030,3 +1041,12 @@ class ResCompany(models.Model):
                     placeholder = _("%s, or / if not applicable", expected_vat)
 
             company.company_vat_placeholder = placeholder
+
+    @api.depends('country_id', 'account_fiscal_country_id')
+    def _compute_company_registry_placeholder(self):
+        """ Provides a dynamic placeholder on the company registry field for countries that may need it.
+        Add your country and the value you want in the _ref_company_registry map in the partner.py file.
+        """
+        for company in self:
+            country_code = (company.account_fiscal_country_id or company.country_id).code or ''
+            company.company_registry_placeholder = _ref_company_registry.get(country_code.lower(), '')

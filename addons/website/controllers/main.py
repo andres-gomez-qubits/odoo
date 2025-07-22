@@ -228,7 +228,15 @@ class Website(Home):
         # Don't use `request.website.domain` here, the template is in charge of
         # detecting if the current URL is the domain one and add a `Disallow: /`
         # if it's not the case to prevent the crawler to continue.
-        return request.render('website.robots', {'url_root': request.httprequest.url_root}, mimetype='text/plain')
+        allowed_routes = self._get_allowed_robots_routes()
+        content = request.env['ir.ui.view']._render_template('website.robots',
+            {'url_root': request.httprequest.url_root})
+
+        if allowed_routes:
+            content += '\nUser-agent: *'
+            content += '\n' + '\n'.join(f"Allow: {route}" for route in allowed_routes)
+
+        return request.make_response(content, headers=[('Content-Type', 'text/plain')])
 
     @http.route('/sitemap.xml', type='http', auth="public", website=True, multilang=False, sitemap=False)
     def sitemap_xml_index(self, **kwargs):
@@ -733,6 +741,10 @@ class Website(Home):
                 result.append(group)
         return result
 
+    @http.route('/website/save_xml', type='json', auth='user', website=True)
+    def save_xml(self, view_id, arch):
+        request.env['ir.ui.view'].browse(view_id).with_context(lang=request.website.default_lang_id.code).arch = arch
+
     @http.route("/website/get_switchable_related_views", type="json", auth="user", website=True, readonly=True)
     def get_switchable_related_views(self, key):
         views = request.env["ir.ui.view"].get_related_views(key, bundles=False).filtered(lambda v: v.customize_show)
@@ -800,19 +812,26 @@ class Website(Home):
     @http.route(['/website/get_seo_data'], type='json', auth="user", website=True, readonly=True)
     def get_seo_data(self, res_id, res_model):
         if not request.env.user.has_group('website.group_website_restricted_editor'):
-            raise werkzeug.exceptions.Forbidden()
+            # Still ok if user can access the record anyway.
+            try:
+                record = request.env[res_model].browse(res_id)
+                record.check_access('write')
+            except AccessError:
+                raise werkzeug.exceptions.Forbidden()
 
         fields = ['website_meta_title', 'website_meta_description', 'website_meta_keywords', 'website_meta_og_img']
-        if res_model == 'website.page':
-            fields.extend(['website_indexed', 'website_id'])
-
         res = {'can_edit_seo': True}
         record = request.env[res_model].browse(res_id)
+        if res_model == 'website.page':
+            fields.extend(['website_indexed', 'website_id'])
+            res["website_is_published"] = record.website_published
+
         try:
             request.website._check_user_can_modify(record)
         except AccessError:
             res['can_edit_seo'] = False
-        record = record.sudo()
+        if request.env.user.has_group('website.group_website_restricted_editor'):
+            record = record.sudo()
 
         res.update(record.read(fields)[0])
         res['has_social_default_image'] = request.website.has_social_default_image

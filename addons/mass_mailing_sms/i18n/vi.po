@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-16 13:39+0000\n"
+"POT-Creation-Date: 2025-05-14 20:47+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Thi Huong Nguyen, 2025\n"
 "Language-Team: Vietnamese (https://app.transifex.com/odoo/teams/41243/vi/)\n"
@@ -307,7 +307,7 @@ msgstr "Yêu cầu đăng ký theo quốc gia cụ thể"
 #. module: mass_mailing_sms
 #: model_terms:ir.actions.act_window,help:mass_mailing_sms.mailing_list_action_sms
 msgid "Create a Mailing List"
-msgstr "Tạo danh sách gửi thư"
+msgstr "Tạo danh sách liên hệ"
 
 #. module: mass_mailing_sms
 #: model_terms:ir.actions.act_window,help:mass_mailing_sms.mailing_mailing_action_sms
@@ -355,7 +355,7 @@ msgstr "Nhân bản"
 #. odoo-python
 #: code:addons/mass_mailing_sms/models/res_users.py:0
 msgid "Email Marketing"
-msgstr "Marketing qua Email"
+msgstr "Marketing qua email"
 
 #. module: mass_mailing_sms
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_contact_view_search
@@ -547,13 +547,13 @@ msgstr "Liên hệ gửi thư"
 #. module: mass_mailing_sms
 #: model:ir.model,name:mass_mailing_sms.model_mailing_list
 msgid "Mailing List"
-msgstr "Danh sách gửi thư"
+msgstr "Danh sách liên hệ"
 
 #. module: mass_mailing_sms
 #: model:ir.actions.act_window,name:mass_mailing_sms.mailing_contact_action_sms
 #: model:ir.ui.menu,name:mass_mailing_sms.mailing_contact_menu_sms
 msgid "Mailing List Contacts"
-msgstr "Liên hệ của danh sách mail"
+msgstr "Liên hệ của danh sách liên hệ"
 
 #. module: mass_mailing_sms
 #: model:ir.actions.act_window,name:mass_mailing_sms.mailing_list_action_sms
@@ -915,6 +915,11 @@ msgstr "Gửi một SMS mẫu"
 #: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_sms_test_view_form
 msgid "Send a sample SMS for testing purpose to the numbers below."
 msgstr "Gửi SMS mẫu tới các số dưới đây để thử nghiệm."
+
+#. module: mass_mailing_sms
+#: model_terms:ir.ui.view,arch_db:mass_mailing_sms.mailing_mailing_view_form_sms
+msgid "Send to all"
+msgstr "Gửi đến tất cả"
 
 #. module: mass_mailing_sms
 #: model:ir.model.fields.selection,name:mass_mailing_sms.selection__mailing_trace__failure_type__sms_server

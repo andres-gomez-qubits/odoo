@@ -490,12 +490,13 @@ class SaleOrder(models.Model):
                 )
             order.team_id = cached_teams[key]
 
-    @api.depends('order_line.price_subtotal', 'currency_id', 'company_id')
+    @api.depends('order_line.price_subtotal', 'currency_id', 'company_id', 'payment_term_id')
     def _compute_amounts(self):
         AccountTax = self.env['account.tax']
         for order in self:
             order_lines = order.order_line.filtered(lambda x: not x.display_type)
             base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
+            base_lines += order._add_base_lines_for_early_payment_discount()
             AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
             AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
             tax_totals = AccountTax._get_tax_totals_summary(
@@ -506,6 +507,43 @@ class SaleOrder(models.Model):
             order.amount_untaxed = tax_totals['base_amount_currency']
             order.amount_tax = tax_totals['tax_amount_currency']
             order.amount_total = tax_totals['total_amount_currency']
+
+    def _add_base_lines_for_early_payment_discount(self):
+        """
+        When applying a payment term with an early payment discount, and when said payment term computes the tax on the
+        'mixed' setting, the tax computation is always based on the discounted amount untaxed.
+        Creates the necessary line for this behavior to be displayed.
+        :returns: array containing the necessary lines or empty array if the payment term isn't epd mixed
+        """
+        self.ensure_one()
+        epd_lines = []
+        if (
+            self.payment_term_id.early_discount
+            and self.payment_term_id.early_pay_discount_computation == 'mixed'
+            and self.payment_term_id.discount_percentage
+        ):
+            percentage = self.payment_term_id.discount_percentage
+            currency = self.currency_id or self.company_id.currency_id
+            for line in self.order_line.filtered(lambda x: not x.display_type):
+                line_amount_after_discount = (line.price_subtotal / 100) * percentage
+                epd_lines.append(self.env['account.tax']._prepare_base_line_for_taxes_computation(
+                    record=self,
+                    price_unit=-line_amount_after_discount,
+                    quantity=1.0,
+                    currency_id=currency,
+                    sign=1,
+                    special_type='early_payment',
+                    tax_ids=line.tax_id,
+                ))
+                epd_lines.append(self.env['account.tax']._prepare_base_line_for_taxes_computation(
+                    record=self,
+                    price_unit=line_amount_after_discount,
+                    quantity=1.0,
+                    currency_id=currency,
+                    sign=1,
+                    special_type='early_payment',
+                ))
+        return epd_lines
 
     @api.depends('order_line.invoice_lines')
     def _get_invoiced(self):
@@ -737,12 +775,13 @@ class SaleOrder(models.Model):
                 )
 
     @api.depends_context('lang')
-    @api.depends('order_line.price_subtotal', 'currency_id', 'company_id')
+    @api.depends('order_line.price_subtotal', 'currency_id', 'company_id', 'payment_term_id')
     def _compute_tax_totals(self):
         AccountTax = self.env['account.tax']
         for order in self:
             order_lines = order.order_line.filtered(lambda x: not x.display_type)
             base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
+            base_lines += order._add_base_lines_for_early_payment_discount()
             AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
             AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
             order.tax_totals = AccountTax._get_tax_totals_summary(
@@ -1122,6 +1161,7 @@ class SaleOrder(models.Model):
         # We don't need it and it creates issues in the creation of linked records.
         context = self._context.copy()
         context.pop('default_name', None)
+        context.pop('default_user_id', None)
 
         self.with_context(context)._action_confirm()
         user = self[:1].create_uid
@@ -1591,8 +1631,8 @@ class SaleOrder(models.Model):
         # 4) Some moves might actually be refunds: convert them if the total amount is negative
         # We do this after the moves have been created since we need taxes, etc. to know if the total
         # is actually negative or not
-        if final:
-            if moves_to_switch := moves.sudo().filtered(lambda m: m.amount_total < 0):
+        if final and (moves_to_switch := moves.sudo().filtered(lambda m: m.amount_total < 0)):
+            with self.env.protecting([moves._fields['team_id']], moves_to_switch):
                 moves_to_switch.action_switch_move_type()
                 self.invoice_ids._set_reversed_entry(moves_to_switch)
 
@@ -1720,17 +1760,6 @@ class SaleOrder(models.Model):
                 access_opt['title'] = _("Accept & Pay Quotation")
             elif self.state in ('draft', 'sent'):
                 access_opt['title'] = _("View Quotation")
-
-        # enable followers that have access through portal
-        follower_group = next(group for group in groups if group[0] == 'follower')
-        follower_group[2]['active'] = True
-        follower_group[2]['has_button_access'] = True
-        access_opt = follower_group[2].setdefault('button_access', {})
-        if self.state in ('draft', 'sent'):
-            access_opt['title'] = _("View Quotation")
-        else:
-            access_opt['title'] = _("View Order")
-        access_opt['url'] = self._notify_get_action_link('view', **local_msg_vals)
 
         return groups
 

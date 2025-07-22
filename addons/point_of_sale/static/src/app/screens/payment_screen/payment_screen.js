@@ -53,7 +53,6 @@ export class PaymentScreen extends Component {
 
     onMounted() {
         const order = this.pos.get_order();
-        this.pos.addPendingOrder([order.id]);
 
         for (const payment of order.payment_ids) {
             const pmid = payment.payment_method_id.id;
@@ -139,7 +138,10 @@ export class PaymentScreen extends Component {
         }
         if (result) {
             this.numberBuffer.reset();
-            if (paymentMethod.use_payment_terminal) {
+            if (
+                paymentMethod.use_payment_terminal &&
+                (paymentMethod.payment_terminal?.fast_payments ?? true)
+            ) {
                 const newPaymentLine = this.paymentLines.at(-1);
                 this.sendPaymentRequest(newPaymentLine);
             }
@@ -237,7 +239,10 @@ export class PaymentScreen extends Component {
         // If a paymentline with a payment terminal linked to
         // it is removed, the terminal should get a cancel
         // request.
-        if (["waiting", "waitingCard", "timeout"].includes(line.get_payment_status())) {
+        if (
+            ["waiting", "waitingCard", "timeout"].includes(line.get_payment_status()) &&
+            line.payment_method_id.payment_terminal
+        ) {
             line.set_payment_status("waitingCancel");
             line.payment_method_id.payment_terminal
                 .send_payment_cancel(this.currentOrder, uuid)
@@ -355,7 +360,7 @@ export class PaymentScreen extends Component {
         // Always show the next screen regardless of error since pos has to
         // continue working even offline.
         let nextScreen = this.nextScreen;
-        let switchScreen = false;
+        let switchScreen = true;
 
         if (
             nextScreen === "ReceiptScreen" &&
@@ -371,7 +376,6 @@ export class PaymentScreen extends Component {
 
                 if (this.pos.config.iface_print_skip_screen) {
                     this.currentOrder.set_screen_data({ name: "" });
-                    this.currentOrder.uiState.locked = true;
                     switchScreen = this.currentOrder.uuid === this.pos.selectedOrderUuid;
                     nextScreen = "ProductScreen";
                     if (switchScreen) {
@@ -379,8 +383,6 @@ export class PaymentScreen extends Component {
                     }
                 }
             }
-        } else {
-            switchScreen = true;
         }
 
         if (switchScreen) {

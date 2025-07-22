@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-27 13:04+0000\n"
+"POT-Creation-Date: 2025-07-11 18:39+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
 "Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Ukrainian (https://app.transifex.com/odoo/teams/41243/uk/)\n"
@@ -386,7 +386,7 @@ msgid ""
 "            amounting in <span style=\"font-weight: bold;\" t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ 10.00</span> is available.\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
-"            <t t-out=\"doc_name or ''\">quotation</t> <span style=\"font-weight: bold;\" t-out=\"object.name or ''\"/>\n"
+"            <t t-out=\"doc_name or ''\">quotation</t> <span style=\"font-weight: bold;\" t-out=\"object.name or ''\">S00052</span>\n"
 "            <t t-if=\"object.origin\">\n"
 "                (with reference: <t t-out=\"object.origin or ''\">S00052</t> )\n"
 "            </t>\n"
@@ -649,6 +649,11 @@ msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
+msgid "<strong class=\"d-block mt-3\">Shipping Address</strong>"
+msgstr "<strong class=\"d-block mt-3\">Адреса доставки</strong>"
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "<strong class=\"mr16\">Subtotal</strong>"
 msgstr "<strong class=\"mr16\">Підсумок</strong>"
@@ -667,11 +672,6 @@ msgstr "<strong>Опис схеми оподаткування:</strong>"
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "<strong>Salesperson</strong>"
 msgstr ""
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
-msgid "<strong>Shipping Address</strong>"
-msgstr "<strong>Адреса доставки</strong>"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
@@ -1355,8 +1355,10 @@ msgstr "Шаблон документу компанії"
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with DHL"
-msgstr "Обчислюйте витрати на доставку та відправляйте з DHL"
+msgid ""
+"Compute shipping costs and ship with DHL<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1365,8 +1367,10 @@ msgstr "Обчислюйте витрати на доставку і відпр�
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with FedEx"
-msgstr "Обчислюйте витрати на доставку та відправляйте з FedEx"
+msgid ""
+"Compute shipping costs and ship with FedEx<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1385,13 +1389,17 @@ msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with UPS"
-msgstr "Обчислюйте витрати на доставку та відправляйте з UPS"
+msgid ""
+"Compute shipping costs and ship with UPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
-msgid "Compute shipping costs and ship with USPS"
-msgstr "Обчислюйте витрати на доставку та відправляйте з USPS"
+msgid ""
+"Compute shipping costs and ship with USPS<br/>\n"
+"                                    <strong>(please go to Home&gt;Apps to install)</strong>"
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
@@ -1682,6 +1690,11 @@ msgid "Customers"
 msgstr "Клієнти"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "DHL Connector"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_dhl
 msgid "DHL Express Connector"
 msgstr "Конектор DHL Express "
@@ -1931,6 +1944,11 @@ msgid "Distribution Analytic Account"
 msgstr "Аналітичний рахунок розподілу"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
+msgid "Documentation"
+msgstr "Документація"
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
 msgid "Documents"
 msgstr "Документи"
@@ -2058,6 +2076,11 @@ msgid "Email"
 msgstr "Ел. пошта"
 
 #. module: sale
+#: model:ir.model,name:sale.model_mail_compose_message
+msgid "Email composition wizard"
+msgstr "Помічник створення електронного листа"
+
+#. module: sale
 #: model:ir.model.fields,help:sale.field_res_config_settings__invoice_mail_template_id
 msgid "Email sent to the customer once the invoice is available."
 msgstr "Клієнту надсилається електронний лист, як тільки доступний рахунок."
@@ -2118,6 +2141,7 @@ msgstr "Додатковий рядок з %s"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_fedex
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "FedEx Connector"
 msgstr "Конектор FedEx"
 
@@ -4193,6 +4217,11 @@ msgid "Salespersons"
 msgstr "Продавці"
 
 #. module: sale
+#: model:ir.model,name:sale.model_mail_scheduled_message
+msgid "Scheduled Message"
+msgstr "Заплановане повідомлення"
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_filter
 #: model_terms:ir.ui.view,arch_db:sale.view_sales_order_line_filter
 msgid "Search Sales Order"
@@ -4521,6 +4550,11 @@ msgid ""
 msgstr ""
 
 #. module: sale
+#: model:ir.model,name:sale.model_ir_config_parameter
+msgid "System Parameter"
+msgstr "Параметр системи"
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__tag_ids
 #: model:ir.ui.menu,name:sale.menu_tag_config
 msgid "Tags"
@@ -4543,9 +4577,19 @@ msgid "Tax Country"
 msgstr "Країна податку"
 
 #. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.view_order_form
+msgid "Tax Excl."
+msgstr ""
+
+#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.report_saleorder_document
 msgid "Tax ID"
 msgstr "ІПН"
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.view_order_form
+msgid "Tax Incl."
+msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_tree
@@ -5051,6 +5095,11 @@ msgid "Transactions"
 msgstr "Операції"
 
 #. module: sale
+#: model:ir.model.fields,field_description:sale.field_sale_order_line__translated_product_name
+msgid "Translated Product Name"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__type_name
 msgid "Type Name"
 msgstr "Назва типу"
@@ -5078,11 +5127,13 @@ msgstr "Заповніть, щоб знайти товар..."
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_ups
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "UPS Connector"
 msgstr "Конектор UPS"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_res_config_settings__module_delivery_usps
+#: model_terms:ir.ui.view,arch_db:sale.res_config_settings_view_form
 msgid "USPS Connector"
 msgstr "Конектор USPS"
 
@@ -5161,11 +5212,6 @@ msgid "Untaxed Total"
 msgstr "Всього без податків"
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_line_wizard_form
-msgid "Untaxed discount"
-msgstr ""
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid "UoM"
 msgstr "Одиниця вимірювання"
@@ -5235,12 +5281,6 @@ msgstr "Запис варіанту у таблиці"
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "View Details"
 msgstr "Переглянути деталі"
-
-#. module: sale
-#. odoo-python
-#: code:addons/sale/models/sale_order.py:0
-msgid "View Order"
-msgstr "Переглянути замовлення"
 
 #. module: sale
 #. odoo-python
@@ -5377,6 +5417,12 @@ msgid ""
 msgstr ""
 "Ви не можете змінити тип рядка замовлення на продаж. Натомість вам необхідно"
 " видалити поточний рядок та створити новий належного типу."
+
+#. module: sale
+#. odoo-python
+#: code:addons/sale/models/sale_order_line.py:0
+msgid "You cannot modify the product of this order line."
+msgstr ""
 
 #. module: sale
 #: model:ir.model.constraint,message:sale.constraint_res_company_check_quotation_validity_days

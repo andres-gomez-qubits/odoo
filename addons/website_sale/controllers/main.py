@@ -13,6 +13,7 @@ from odoo.fields import Command
 from odoo.http import request, route
 from odoo.osv import expression
 from odoo.tools import clean_context, float_round, groupby, lazy, single_email_re, str2bool, SQL
+from odoo.tools.image import image_data_uri
 from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.translate import _
 
@@ -704,6 +705,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                         pass
                     redirect_url = decoded_url.replace(query=url_encode(args)).to_url()
             request.session['website_sale_current_pl'] = pricelist.id
+            request.session['website_sale_selected_pl_id'] = pricelist.id
             order_sudo = request.website.sale_get_order()
             if order_sudo:
                 order_sudo._cart_update_pricelist(pricelist_id=pricelist.id)
@@ -719,12 +721,14 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 return request.redirect("%s?code_not_available=1" % redirect)
 
             request.session['website_sale_current_pl'] = pricelist_sudo.id
+            request.session['website_sale_selected_pl_id'] = pricelist_sudo.id
             order_sudo = request.website.sale_get_order()
             if order_sudo:
                 order_sudo._cart_update_pricelist(pricelist_id=pricelist_sudo.id)
         else:
             # Reset the pricelist if empty promo code is given
             request.session.pop('website_sale_current_pl', None)
+            request.session.pop('website_sale_selected_pl_id', None)
             order_sudo = request.website.sale_get_order()
             if order_sudo:
                 pl_before = order_sudo.pricelist_id
@@ -860,17 +864,37 @@ class WebsiteSale(payment_portal.PaymentPortal):
             no_variant_attribute_value_ids=no_variant_attribute_value_ids,
             **kwargs
         )
+
         # If the line is a combo product line, and it already has combo items, we need to update
         # the combo item quantities as well.
         line = request.env['sale.order.line'].browse(values['line_id'])
         if line.product_type == 'combo' and line.linked_line_ids:
-            for linked_line_id in line.linked_line_ids:
-                if values['quantity'] != linked_line_id.product_uom_qty:
-                    order._cart_update(
-                        product_id=linked_line_id.product_id.id,
-                        line_id=linked_line_id.id,
-                        set_qty=values['quantity'],
+            quantity = values['quantity']
+            combo_quantity = quantity
+            # A combo product and its items should have the same quantity (by design). So, if the
+            # requested quantity isn't available for one or more combo items, we should lower the
+            # quantity of the combo product and its items to the maximum available quantity of the
+            # combo item with the least available quantity.
+            for linked_line in line.linked_line_ids:
+                if quantity != linked_line.product_uom_qty:
+                    combo_item_quantity, warning = order._verify_updated_quantity(
+                        linked_line, linked_line.product_id.id, quantity, **kwargs
                     )
+                    combo_quantity = min(combo_quantity, combo_item_quantity)
+            for linked_line in line.linked_line_ids:
+                order._cart_update(
+                    product_id=linked_line.product_id.id,
+                    line_id=linked_line.id,
+                    set_qty=combo_quantity,
+                    **kwargs,
+                )
+            if combo_quantity < quantity:
+                order._cart_update(
+                    product_id=product_id,
+                    line_id=line_id,
+                    set_qty=combo_quantity,
+                    **kwargs,
+                )
 
         values['notification_info'] = self._get_cart_notification_information(order, [values['line_id']])
         values['notification_info']['warning'] = values.pop('warning', '')
@@ -881,8 +905,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
             return values
 
         values['cart_quantity'] = order.cart_quantity
+
+        # Values for express checkout
         values['minor_amount'] = payment_utils.to_minor_currency_units(
-            order.amount_total, order.currency_id
+            order._get_amount_total_excluding_delivery(), order.currency_id
         )
         values['amount'] = order.amount_total
 
@@ -963,8 +989,18 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     def _get_additional_notification_information(self, line):
         # Only set the linked line id for combo items, not for optional products.
-        if line.combo_item_id:
-            return {'linked_line_id': line.linked_line_id.id}
+        if combo_item := line.combo_item_id:
+            infos = {'linked_line_id': line.linked_line_id.id}
+            # To sell a product type 'combo', one doesn't need to publish all combo choices. This
+            # causes an issue when public users access the image of each choice via the /web/image
+            # route. To bypass this access check, we send the raw image URL if the product is
+            # inaccessible to the current user.
+            if (
+                not combo_item.product_id.sudo(False).has_access('read')
+                and combo_item.product_id.image_128
+            ):
+                infos['image_url'] = image_data_uri(combo_item.product_id.image_128)
+            return infos
         return {}
 
     # ------------------------------------------------------
@@ -1203,7 +1239,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         """
         order_sudo = request.website.sale_get_order()
         if redirection := self._check_cart(order_sudo):
-            return redirection
+            return json.dumps({'redirectUrl': redirection.location})
 
         partner_sudo, address_type = self._prepare_address_update(
             order_sudo, partner_id=partner_id and int(partner_id), address_type=address_type
@@ -1278,7 +1314,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         self._handle_extra_form_data(extra_form_data, address_values)
 
         return json.dumps({
-            'successUrl': callback,
+            'redirectUrl': callback,
         })
 
     def _prepare_address_update(self, order_sudo, partner_id=None, address_type=None):
@@ -1395,7 +1431,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             name_change = (
                 'name' in address_values
                 and partner_sudo.name
-                and address_values['name'] != partner_sudo.name
+                and address_values['name'] != partner_sudo.name.strip()
             )
             email_change = (
                 'email' in address_values
@@ -1552,6 +1588,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :return: The route to redirect the customer to.
         :rtype: str
         """
+        # TODO: remove me in master with call site, not used in standard codebase anymore.
         return ''
 
     def _handle_extra_form_data(self, extra_form_data, address_values):
@@ -1597,7 +1634,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 use_delivery_as_billing=False,
                 order_sudo=order_sudo,
             )
-            with request.env.protecting(['pricelist_id'], order_sudo):
+            with request.env.protecting([order_sudo._fields['pricelist_id']], order_sudo):
                 order_sudo.partner_id = new_partner_sudo
 
             # Add the new partner as follower of the cart
@@ -1624,9 +1661,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if shipping_address:
             #in order to not override shippig address, it's checked separately from shipping option
             self._include_country_and_state_in_address(shipping_address)
-            shipping_address, _side_values = self._parse_form_data(billing_address)
+            shipping_address, _side_values = self._parse_form_data(shipping_address)
 
-            if order_sudo.partner_shipping_id.name.endswith(order_sudo.name):
+            if order_sudo.name in order_sudo.partner_shipping_id.name:
                 # The existing partner was created by `process_express_checkout_delivery_choice`, it
                 # means that the partner is missing information, so we update it.
                 order_sudo.partner_shipping_id.write(shipping_address)
@@ -1696,7 +1733,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         country = request.env["res.country"].search([
             ('code', '=', address.pop('country')),
         ], limit=1)
-        if state_code := address.pop('state'):
+        if state_code := address.pop('state', None):
             state = request.env['res.country.state'].search([
                 ('code', '=', state_code),
                 ('country_id', '=', country.id),
@@ -1790,8 +1827,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
         )
         payment_form_values.update({
             'payment_access_token': payment_form_values.pop('access_token'),  # Rename the key.
+            # Do not include delivery related lines
             'minor_amount': payment_utils.to_minor_currency_units(
-                order.amount_total, order.currency_id
+                order._get_amount_total_excluding_delivery(), order.currency_id
             ),
             'merchant_name': request.website.name,
             'transaction_route': f'/shop/payment/transaction/{order.id}',
@@ -1799,8 +1837,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
             'landing_route': '/shop/payment/validate',
             'payment_method_unknown_id': request.env.ref('payment.payment_method_unknown').id,
             'shipping_info_required': order._has_deliverable_products(),
+            # Todo: remove in master
             'delivery_amount': payment_utils.to_minor_currency_units(
-                order.order_line.filtered(lambda l: l.is_delivery).price_total, order.currency_id
+                order.amount_total - order._compute_amount_total_without_delivery(), order.currency_id
             ),
             'shipping_address_update_route': self._express_checkout_delivery_route,
         })
@@ -1810,6 +1849,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     def _get_shop_payment_values(self, order, **kwargs):
         checkout_page_values = {
+            'sale_order': order,
             'website_sale_order': order,
             'errors': self._get_shop_payment_errors(order),
             'partner': order.partner_invoice_id,

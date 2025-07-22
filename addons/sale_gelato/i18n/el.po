@@ -5,6 +5,7 @@
 # Translators:
 # Martin Trigaux, 2025
 # Kostas Goutoudis <goutoudis@gmail.com>, 2025
+# Agapi Psyllou, 2025
 # Iasonas Polydoros <j.polydoros@dileanity.com>, 2025
 # 
 msgid ""
@@ -222,7 +223,7 @@ msgstr "Είδος"
 #. module: sale_gelato
 #: model:ir.model,name:sale_gelato.model_product_document
 msgid "Product Document"
-msgstr ""
+msgstr "Έγγραφο Προϊόντος"
 
 #. module: sale_gelato
 #: model_terms:ir.ui.view,arch_db:sale_gelato.product_product_easy_form
@@ -259,7 +260,7 @@ msgstr ""
 #. module: sale_gelato
 #: model:ir.model,name:sale_gelato.model_delivery_carrier
 msgid "Shipping Methods"
-msgstr ""
+msgstr "Τρόποι Αποστολής"
 
 #. module: sale_gelato
 #: model:delivery.carrier,name:sale_gelato.standard_delivery
